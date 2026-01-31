@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      id-token: write
+      id-token: write  # Required for npm OIDC Trusted Publishing
     
     steps:
       - name: Checkout
@@ -27,8 +27,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           registry-url: 'https://registry.npmjs.org'
+
+      # npm v11+ required for reliable OIDC trusted publishing
+      - name: Update npm to latest
+        run: npm install -g npm@latest
 
       - name: Install dependencies
         run: npm ci
@@ -52,7 +56,8 @@ jobs:
           git push
           git push --tags
 
-      # For release trigger - version should already be set
+      # Publish using OIDC Trusted Publishing (no token needed if configured correctly)
+      # Falls back to NPM_TOKEN if OIDC fails
       - name: Publish to npm
         run: npm publish --provenance --access public
         env:
