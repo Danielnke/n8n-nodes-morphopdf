@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/morphopdf/n8n-nodes-morphopdf.git"
+    "url": "https://github.com/Danielnke/n8n-nodes-morphopdf.git"
   },
   "engines": {
     "node": ">=20.15"
