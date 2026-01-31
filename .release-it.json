@@ -1,0 +1,22 @@
+{
+  "git": {
+    "requireBranch": "main",
+    "requireCleanWorkingDir": true,
+    "requireUpstream": false,
+    "requireCommits": true,
+    "commit": true,
+    "tag": true,
+    "push": false,
+    "changelog": "npx auto-changelog --stdout --unreleased --commit-limit false -u --hide-credit"
+  },
+  "github": {
+    "release": false
+  },
+  "npm": {
+    "publish": true
+  },
+  "hooks": {
+    "before:init": "npm run lint && npm run build",
+    "after:bump": "npx auto-changelog -p"
+  }
+}
