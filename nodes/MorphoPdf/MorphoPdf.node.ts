@@ -67,6 +67,7 @@ export class MorphoPdf implements INodeType {
     displayName: 'MorphoPDF',
     name: 'morphoPdf',
     icon: 'file:morphopdf.svg',
+    iconColor: 'blue',
     group: ['transform'],
     version: 1,
     subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
