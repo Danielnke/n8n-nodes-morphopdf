@@ -1,0 +1,62 @@
+{
+  "name": "n8n-nodes-morphopdf",
+  "version": "1.0.0",
+  "description": "n8n community node for MorphoPDF - Professional PDF processing and conversion",
+  "keywords": [
+    "n8n-community-node-package",
+    "pdf",
+    "morphopdf",
+    "document",
+    "conversion",
+    "merge",
+    "split",
+    "compress"
+  ],
+  "license": "MIT",
+  "homepage": "https://morphopdf.com",
+  "author": {
+    "name": "MorphoPDF",
+    "email": "support@morphopdf.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/morphopdf/n8n-nodes-morphopdf.git"
+  },
+  "engines": {
+    "node": ">=20.15"
+  },
+  "main": "index.js",
+  "scripts": {
+    "build": "n8n-node build",
+    "build:watch": "tsc --watch",
+    "dev": "n8n-node dev",
+    "lint": "n8n-node lint",
+    "lint:fix": "n8n-node lint --fix",
+    "release": "n8n-node release",
+    "prepublishOnly": "n8n-node prerelease"
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "strict": true,
+    "credentials": [
+      "dist/credentials/MorphoPdfApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/MorphoPdf/MorphoPdf.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@n8n/node-cli": "*",
+    "@types/node": "^25.1.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.0",
+    "release-it": "^19.0.0",
+    "typescript": "^5.5.0"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  }
+}

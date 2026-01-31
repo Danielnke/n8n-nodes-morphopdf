@@ -1,0 +1,22 @@
+{
+  "node": "n8n-nodes-base.morphoPdf",
+  "nodeVersion": "1.0",
+  "codexVersion": "1.0",
+  "categories": ["Productivity", "Data & Storage"],
+  "resources": {
+    "credentialDocumentation": [
+      {
+        "url": "https://docs.morphopdf.com/api"
+      }
+    ],
+    "primaryDocumentation": [
+      {
+        "url": "https://docs.morphopdf.com/integrations/n8n"
+      }
+    ]
+  },
+  "alias": ["pdf", "document", "convert", "merge", "split", "compress"],
+  "subcategories": {
+    "Productivity": ["Document Processing"]
+  }
+}

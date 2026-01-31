@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="60" height="60">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="60" height="60" rx="12" fill="url(#grad1)"/>
+  <!-- PDF Document -->
+  <path d="M18 12h16l10 10v26a2 2 0 01-2 2H18a2 2 0 01-2-2V14a2 2 0 012-2z" fill="white"/>
+  <path d="M34 12v8a2 2 0 002 2h8" fill="none" stroke="white" stroke-width="2"/>
+  <!-- PDF Text -->
+  <text x="30" y="38" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#6366f1" text-anchor="middle">PDF</text>
+  <!-- Morph Arrow -->
+  <path d="M22 44h16m-4-3l4 3-4 3" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
