@@ -1,7 +1,7 @@
 import type { INodeProperties } from 'n8n-workflow';
 
 /**
- * Resource selector - PDF operations or Conversions
+ * Resource selector - 4 categories matching API documentation
  */
 export const resourceProperty: INodeProperties = {
   displayName: 'Resource',
@@ -10,74 +10,119 @@ export const resourceProperty: INodeProperties = {
   noDataExpression: true,
   options: [
     {
-      name: 'PDF',
-      value: 'pdf',
-      description: 'Manipulate PDF files - merge, split, compress, rotate, etc',
+      name: 'Document Management',
+      value: 'documentManagement',
+      description: 'Merge, split, compress, organize, crop, rotate, and watermark PDFs',
     },
     {
-      name: 'Convert',
-      value: 'convert',
-      description: 'Convert between PDF and other formats',
+      name: 'PDF to Format',
+      value: 'pdfToFormat',
+      description: 'Convert PDF to Word, Excel, PowerPoint, or Image',
+    },
+    {
+      name: 'Format to PDF',
+      value: 'formatToPdf',
+      description: 'Convert Word, Excel, PowerPoint, Image, HTML, or Markdown to PDF',
+    },
+    {
+      name: 'Security & Signing',
+      value: 'securitySigning',
+      description: 'Protect, unlock, or sign PDF documents',
     },
   ],
-  default: 'pdf',
+  default: 'documentManagement',
 };
 
 /**
- * PDF Operations
+ * Document Management Operations
  */
-export const pdfOperationProperty: INodeProperties = {
+export const documentManagementOperationProperty: INodeProperties = {
   displayName: 'Operation',
   name: 'operation',
   type: 'options',
   noDataExpression: true,
   displayOptions: {
     show: {
-      resource: ['pdf'],
+      resource: ['documentManagement'],
     },
   },
   options: [
-    { name: 'Compress', value: 'compress', action: 'Compress PDF', description: 'Reduce PDF file size while maintaining quality' },
-    { name: 'Crop', value: 'crop', action: 'Crop PDF', description: 'Crop page margins or specific areas' },
-    { name: 'Edit', value: 'edit', action: 'Edit PDF', description: 'Add text, shapes, or annotations' },
-    { name: 'Merge', value: 'merge', action: 'Merge PDF', description: 'Combine 2 or more PDF files into a single document' },
-    { name: 'Organize', value: 'organize', action: 'Organize PDF', description: 'Reorder, delete, or duplicate pages' },
-    { name: 'Protect', value: 'protect', action: 'Protect PDF', description: 'Add password and set permissions' },
-    { name: 'Rotate', value: 'rotate', action: 'Rotate PDF', description: 'Rotate all or specific pages by 90, 180, or 270 degrees' },
-    { name: 'Sign', value: 'sign', action: 'Sign PDF', description: 'Add signature image to PDF' },
-    { name: 'Split', value: 'split', action: 'Split PDF', description: 'Split PDF by page ranges or extract individual pages' },
-    { name: 'Unlock', value: 'unlock', action: 'Unlock PDF', description: 'Remove password protection from PDF' },
-    { name: 'Watermark', value: 'watermark', action: 'Watermark PDF', description: 'Add text or image watermark to pages' },
+    { name: 'Compress PDF', value: 'compress', action: 'Compress PDF', description: 'Reduce PDF file size while maintaining quality' },
+    { name: 'Crop PDF', value: 'crop', action: 'Crop PDF', description: 'Crop page margins or specific areas' },
+    { name: 'Merge PDF', value: 'merge', action: 'Merge PDF', description: 'Combine 2 or more PDF files into a single document' },
+    { name: 'Organize PDF', value: 'organize', action: 'Organize PDF', description: 'Reorder, delete, or duplicate pages' },
+    { name: 'Rotate PDF', value: 'rotate', action: 'Rotate PDF', description: 'Rotate all or specific pages by 90, 180, or 270 degrees' },
+    { name: 'Split PDF', value: 'split', action: 'Split PDF', description: 'Split PDF by page ranges or extract individual pages' },
+    { name: 'Watermark PDF', value: 'watermark', action: 'Watermark PDF', description: 'Add text or image watermark to pages' },
   ],
-  default: 'compress',
+  default: 'merge',
 };
 
 /**
- * Convert Operations
+ * PDF to Format Operations
  */
-export const convertOperationProperty: INodeProperties = {
+export const pdfToFormatOperationProperty: INodeProperties = {
   displayName: 'Operation',
   name: 'operation',
   type: 'options',
   noDataExpression: true,
   displayOptions: {
     show: {
-      resource: ['convert'],
+      resource: ['pdfToFormat'],
+    },
+  },
+  options: [
+    { name: 'PDF to Excel', value: 'pdfToExcel', action: 'PDF to Excel', description: 'Extract tables from PDF to XLSX' },
+    { name: 'PDF to Image', value: 'pdfToImage', action: 'PDF to Image', description: 'Convert PDF pages to PNG or JPG' },
+    { name: 'PDF to PowerPoint', value: 'pdfToPowerpoint', action: 'PDF to PowerPoint', description: 'Convert PDF to PPTX format' },
+    { name: 'PDF to Word', value: 'pdfToWord', action: 'PDF to Word', description: 'Convert PDF to DOCX format' },
+  ],
+  default: 'pdfToWord',
+};
+
+/**
+ * Format to PDF Operations
+ */
+export const formatToPdfOperationProperty: INodeProperties = {
+  displayName: 'Operation',
+  name: 'operation',
+  type: 'options',
+  noDataExpression: true,
+  displayOptions: {
+    show: {
+      resource: ['formatToPdf'],
     },
   },
   options: [
     { name: 'Excel to PDF', value: 'excelToPdf', action: 'Excel to PDF', description: 'Convert XLSX to PDF' },
-    { name: 'HTML to PDF', value: 'htmlToPdf', action: 'Html to pdf', description: 'Render webpage or HTML content to PDF' },
-    { name: 'Images to PDF', value: 'imageToPdf', action: 'Images to PDF', description: 'Combine images into a PDF document' },
+    { name: 'HTML to PDF', value: 'htmlToPdf', action: 'HTML to PDF', description: 'Render webpage or HTML content to PDF' },
+    { name: 'Image to PDF', value: 'imageToPdf', action: 'Image to PDF', description: 'Combine images into a PDF document' },
     { name: 'Markdown to PDF', value: 'markdownToPdf', action: 'Markdown to PDF', description: 'Convert Markdown text to PDF' },
-    { name: 'PDF to Excel', value: 'pdfToExcel', action: 'Pdf to excel', description: 'Extract tables from PDF to XLSX' },
-    { name: 'PDF to Images', value: 'pdfToImage', action: 'Pdf to images', description: 'Convert PDF pages to PNG or JPG' },
-    { name: 'PDF to PowerPoint', value: 'pdfToPowerpoint', action: 'Pdf to power point', description: 'Convert PDF to PPTX format' },
-    { name: 'PDF to Word', value: 'pdfToWord', action: 'Pdf to word', description: 'Convert PDF to DOCX format' },
-    { name: 'PowerPoint to PDF', value: 'powerpointToPdf', action: 'Power point to pdf', description: 'Convert PPTX to PDF' },
+    { name: 'PowerPoint to PDF', value: 'powerpointToPdf', action: 'PowerPoint to PDF', description: 'Convert PPTX to PDF' },
     { name: 'Word to PDF', value: 'wordToPdf', action: 'Word to PDF', description: 'Convert DOCX to PDF' },
   ],
-  default: 'pdfToWord',
+  default: 'wordToPdf',
+};
+
+/**
+ * Security & Signing Operations
+ */
+export const securitySigningOperationProperty: INodeProperties = {
+  displayName: 'Operation',
+  name: 'operation',
+  type: 'options',
+  noDataExpression: true,
+  displayOptions: {
+    show: {
+      resource: ['securitySigning'],
+    },
+  },
+  options: [
+    { name: 'Protect PDF', value: 'protect', action: 'Protect PDF', description: 'Add password and set permissions' },
+    { name: 'Sign PDF', value: 'sign', action: 'Sign PDF', description: 'Add signature image to PDF' },
+    { name: 'Unlock PDF', value: 'unlock', action: 'Unlock PDF', description: 'Remove password protection from PDF' },
+  ],
+  default: 'protect',
 };
 
 /**
@@ -150,7 +195,7 @@ export const fileUrlsProperty: INodeProperties = {
   default: [],
   displayOptions: {
     show: {
-      resource: ['pdf'],
+      resource: ['documentManagement'],
       operation: ['merge'],
       inputMethod: ['url'],
     },
@@ -179,7 +224,7 @@ export const qualityProperty: INodeProperties = {
   type: 'options',
   displayOptions: {
     show: {
-      resource: ['pdf'],
+      resource: ['documentManagement'],
       operation: ['compress'],
     },
   },
@@ -213,7 +258,7 @@ export const splitModeProperty: INodeProperties = {
   type: 'options',
   displayOptions: {
     show: {
-      resource: ['pdf'],
+      resource: ['documentManagement'],
       operation: ['split'],
     },
   },
@@ -241,7 +286,7 @@ export const rangesProperty: INodeProperties = {
   type: 'string',
   displayOptions: {
     show: {
-      resource: ['pdf'],
+      resource: ['documentManagement'],
       operation: ['split'],
       splitMode: ['ranges'],
     },
@@ -260,7 +305,7 @@ export const rotationAngleProperty: INodeProperties = {
   type: 'options',
   displayOptions: {
     show: {
-      resource: ['pdf'],
+      resource: ['documentManagement'],
       operation: ['rotate'],
     },
   },
@@ -281,7 +326,7 @@ export const rotatePagesProperty: INodeProperties = {
   type: 'string',
   displayOptions: {
     show: {
-      resource: ['pdf'],
+      resource: ['documentManagement'],
       operation: ['rotate'],
     },
   },
@@ -299,7 +344,7 @@ export const watermarkTypeProperty: INodeProperties = {
   type: 'options',
   displayOptions: {
     show: {
-      resource: ['pdf'],
+      resource: ['documentManagement'],
       operation: ['watermark'],
     },
   },
@@ -319,7 +364,7 @@ export const watermarkTextProperty: INodeProperties = {
   type: 'string',
   displayOptions: {
     show: {
-      resource: ['pdf'],
+      resource: ['documentManagement'],
       operation: ['watermark'],
       watermarkType: ['text'],
     },
@@ -337,7 +382,7 @@ export const watermarkImageUrlProperty: INodeProperties = {
   type: 'string',
   displayOptions: {
     show: {
-      resource: ['pdf'],
+      resource: ['documentManagement'],
       operation: ['watermark'],
       watermarkType: ['image'],
     },
@@ -356,7 +401,7 @@ export const watermarkPositionProperty: INodeProperties = {
   type: 'options',
   displayOptions: {
     show: {
-      resource: ['pdf'],
+      resource: ['documentManagement'],
       operation: ['watermark'],
     },
   },
@@ -386,7 +431,7 @@ export const watermarkOpacityProperty: INodeProperties = {
   },
   displayOptions: {
     show: {
-      resource: ['pdf'],
+      resource: ['documentManagement'],
       operation: ['watermark'],
     },
   },
@@ -403,7 +448,7 @@ export const watermarkRotationProperty: INodeProperties = {
   type: 'number',
   displayOptions: {
     show: {
-      resource: ['pdf'],
+      resource: ['documentManagement'],
       operation: ['watermark'],
       watermarkType: ['text'],
     },
@@ -422,7 +467,7 @@ export const userPasswordProperty: INodeProperties = {
   typeOptions: { password: true },
   displayOptions: {
     show: {
-      resource: ['pdf'],
+      resource: ['securitySigning'],
       operation: ['protect'],
     },
   },
@@ -440,7 +485,7 @@ export const ownerPasswordProperty: INodeProperties = {
   typeOptions: { password: true },
   displayOptions: {
     show: {
-      resource: ['pdf'],
+      resource: ['securitySigning'],
       operation: ['protect'],
     },
   },
@@ -458,7 +503,7 @@ export const passwordProperty: INodeProperties = {
   typeOptions: { password: true },
   displayOptions: {
     show: {
-      resource: ['pdf'],
+      resource: ['securitySigning'],
       operation: ['unlock'],
     },
   },
@@ -476,7 +521,7 @@ export const imageFormatProperty: INodeProperties = {
   type: 'options',
   displayOptions: {
     show: {
-      resource: ['convert'],
+      resource: ['pdfToFormat'],
       operation: ['pdfToImage'],
     },
   },
@@ -496,7 +541,7 @@ export const dpiProperty: INodeProperties = {
   type: 'options',
   displayOptions: {
     show: {
-      resource: ['convert'],
+      resource: ['pdfToFormat'],
       operation: ['pdfToImage'],
     },
   },
@@ -519,7 +564,7 @@ export const pageRangeProperty: INodeProperties = {
   type: 'string',
   displayOptions: {
     show: {
-      resource: ['convert'],
+      resource: ['pdfToFormat'],
       operation: ['pdfToImage'],
     },
   },
@@ -537,7 +582,7 @@ export const htmlSourceTypeProperty: INodeProperties = {
   type: 'options',
   displayOptions: {
     show: {
-      resource: ['convert'],
+      resource: ['formatToPdf'],
       operation: ['htmlToPdf'],
     },
   },
@@ -557,7 +602,7 @@ export const htmlUrlProperty: INodeProperties = {
   type: 'string',
   displayOptions: {
     show: {
-      resource: ['convert'],
+      resource: ['formatToPdf'],
       operation: ['htmlToPdf'],
       htmlSourceType: ['url'],
     },
@@ -579,7 +624,7 @@ export const htmlContentProperty: INodeProperties = {
   },
   displayOptions: {
     show: {
-      resource: ['convert'],
+      resource: ['formatToPdf'],
       operation: ['htmlToPdf'],
       htmlSourceType: ['html'],
     },
@@ -598,7 +643,7 @@ export const pageFormatProperty: INodeProperties = {
   type: 'options',
   displayOptions: {
     show: {
-      resource: ['convert'],
+      resource: ['formatToPdf'],
       operation: ['htmlToPdf', 'markdownToPdf'],
     },
   },
@@ -619,7 +664,7 @@ export const landscapeProperty: INodeProperties = {
   type: 'boolean',
   displayOptions: {
     show: {
-      resource: ['convert'],
+      resource: ['formatToPdf'],
       operation: ['htmlToPdf', 'markdownToPdf'],
     },
   },
@@ -636,10 +681,221 @@ export const ocrForScannedProperty: INodeProperties = {
   type: 'boolean',
   displayOptions: {
     show: {
-      resource: ['convert'],
+      resource: ['pdfToFormat'],
       operation: ['pdfToWord'],
     },
   },
   default: false,
   description: 'Whether to enable OCR to extract text from scanned/image-based PDFs',
+};
+
+/**
+ * New Page Order (for organize)
+ */
+export const newPageOrderProperty: INodeProperties = {
+  displayName: 'New Page Order',
+  name: 'newPageOrder',
+  type: 'string',
+  displayOptions: {
+    show: {
+      resource: ['documentManagement'],
+      operation: ['organize'],
+    },
+  },
+  default: '',
+  placeholder: '3,1,2,4',
+  description: 'New order of pages (comma-separated page numbers). E.g., "3,1,2,4" moves page 3 first.',
+};
+
+/**
+ * Crop Mode
+ */
+export const cropModeProperty: INodeProperties = {
+  displayName: 'Crop Mode',
+  name: 'cropMode',
+  type: 'options',
+  displayOptions: {
+    show: {
+      resource: ['documentManagement'],
+      operation: ['crop'],
+    },
+  },
+  options: [
+    { name: 'Uniform (All Pages)', value: 'uniform' },
+    { name: 'Per Page', value: 'perPage' },
+  ],
+  default: 'uniform',
+  description: 'Whether to apply the same crop to all pages or different crops per page',
+};
+
+/**
+ * Crop Top Margin
+ */
+export const cropTopProperty: INodeProperties = {
+  displayName: 'Top Margin (points)',
+  name: 'cropTop',
+  type: 'number',
+  displayOptions: {
+    show: {
+      resource: ['documentManagement'],
+      operation: ['crop'],
+    },
+  },
+  default: 0,
+  description: 'Amount to crop from the top edge (in points, 72 points = 1 inch)',
+};
+
+/**
+ * Crop Right Margin
+ */
+export const cropRightProperty: INodeProperties = {
+  displayName: 'Right Margin (points)',
+  name: 'cropRight',
+  type: 'number',
+  displayOptions: {
+    show: {
+      resource: ['documentManagement'],
+      operation: ['crop'],
+    },
+  },
+  default: 0,
+  description: 'Amount to crop from the right edge (in points)',
+};
+
+/**
+ * Crop Bottom Margin
+ */
+export const cropBottomProperty: INodeProperties = {
+  displayName: 'Bottom Margin (points)',
+  name: 'cropBottom',
+  type: 'number',
+  displayOptions: {
+    show: {
+      resource: ['documentManagement'],
+      operation: ['crop'],
+    },
+  },
+  default: 0,
+  description: 'Amount to crop from the bottom edge (in points)',
+};
+
+/**
+ * Crop Left Margin
+ */
+export const cropLeftProperty: INodeProperties = {
+  displayName: 'Left Margin (points)',
+  name: 'cropLeft',
+  type: 'number',
+  displayOptions: {
+    show: {
+      resource: ['documentManagement'],
+      operation: ['crop'],
+    },
+  },
+  default: 0,
+  description: 'Amount to crop from the left edge (in points)',
+};
+
+/**
+ * Signature Image URL
+ */
+export const signatureImageUrlProperty: INodeProperties = {
+  displayName: 'Signature Image URL',
+  name: 'signatureImageUrl',
+  type: 'string',
+  displayOptions: {
+    show: {
+      resource: ['securitySigning'],
+      operation: ['sign'],
+    },
+  },
+  default: '',
+  required: true,
+  placeholder: 'https://example.com/signature.png',
+  description: 'Public URL of the signature image (PNG or JPG)',
+};
+
+/**
+ * Signature Page
+ */
+export const signaturePageProperty: INodeProperties = {
+  displayName: 'Page Number',
+  name: 'signaturePage',
+  type: 'number',
+  displayOptions: {
+    show: {
+      resource: ['securitySigning'],
+      operation: ['sign'],
+    },
+  },
+  default: 1,
+  description: 'Page number to place the signature on (1-based)',
+};
+
+/**
+ * Signature X Position
+ */
+export const signatureXProperty: INodeProperties = {
+  displayName: 'X Position (points)',
+  name: 'signatureX',
+  type: 'number',
+  displayOptions: {
+    show: {
+      resource: ['securitySigning'],
+      operation: ['sign'],
+    },
+  },
+  default: 100,
+  description: 'Horizontal position of the signature from the left edge (in points)',
+};
+
+/**
+ * Signature Y Position
+ */
+export const signatureYProperty: INodeProperties = {
+  displayName: 'Y Position (points)',
+  name: 'signatureY',
+  type: 'number',
+  displayOptions: {
+    show: {
+      resource: ['securitySigning'],
+      operation: ['sign'],
+    },
+  },
+  default: 100,
+  description: 'Vertical position of the signature from the bottom edge (in points)',
+};
+
+/**
+ * Signature Width
+ */
+export const signatureWidthProperty: INodeProperties = {
+  displayName: 'Width (points)',
+  name: 'signatureWidth',
+  type: 'number',
+  displayOptions: {
+    show: {
+      resource: ['securitySigning'],
+      operation: ['sign'],
+    },
+  },
+  default: 150,
+  description: 'Width of the signature image (in points)',
+};
+
+/**
+ * Signature Height
+ */
+export const signatureHeightProperty: INodeProperties = {
+  displayName: 'Height (points)',
+  name: 'signatureHeight',
+  type: 'number',
+  displayOptions: {
+    show: {
+      resource: ['securitySigning'],
+      operation: ['sign'],
+    },
+  },
+  default: 50,
+  description: 'Height of the signature image (in points)',
 };

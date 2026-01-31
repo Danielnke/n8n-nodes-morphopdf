@@ -8,8 +8,10 @@ import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
 import {
   resourceProperty,
-  pdfOperationProperty,
-  convertOperationProperty,
+  documentManagementOperationProperty,
+  pdfToFormatOperationProperty,
+  formatToPdfOperationProperty,
+  securitySigningOperationProperty,
   inputMethodProperty,
   binaryPropertyNameProperty,
   fileUrlProperty,
@@ -38,29 +40,48 @@ import {
   pageFormatProperty,
   landscapeProperty,
   ocrForScannedProperty,
+  // New properties for organize, crop, and sign
+  newPageOrderProperty,
+  cropModeProperty,
+  cropTopProperty,
+  cropRightProperty,
+  cropBottomProperty,
+  cropLeftProperty,
+  signatureImageUrlProperty,
+  signaturePageProperty,
+  signatureXProperty,
+  signatureYProperty,
+  signatureWidthProperty,
+  signatureHeightProperty,
 } from './shared/descriptions';
 
-import { executeMerge } from './actions/pdf/merge.operation';
-import { executeSplit } from './actions/pdf/split.operation';
-import { executeCompress } from './actions/pdf/compress.operation';
-import { executeRotate } from './actions/pdf/rotate.operation';
-import { executeCrop } from './actions/pdf/crop.operation';
-import { executeOrganize } from './actions/pdf/organize.operation';
-import { executeEdit } from './actions/pdf/edit.operation';
-import { executeWatermark } from './actions/pdf/watermark.operation';
-import { executeSign } from './actions/pdf/sign.operation';
-import { executeProtect } from './actions/pdf/protect.operation';
-import { executeUnlock } from './actions/pdf/unlock.operation';
-import { executePdfToWord } from './actions/convert/pdfToWord.operation';
-import { executePdfToExcel } from './actions/convert/pdfToExcel.operation';
-import { executePdfToPowerpoint } from './actions/convert/pdfToPowerpoint.operation';
-import { executePdfToImage } from './actions/convert/pdfToImage.operation';
-import { executeWordToPdf } from './actions/convert/wordToPdf.operation';
-import { executeExcelToPdf } from './actions/convert/excelToPdf.operation';
-import { executePowerpointToPdf } from './actions/convert/powerpointToPdf.operation';
-import { executeImageToPdf } from './actions/convert/imageToPdf.operation';
-import { executeHtmlToPdf } from './actions/convert/htmlToPdf.operation';
-import { executeMarkdownToPdf } from './actions/convert/markdownToPdf.operation';
+// Document Management operations
+import { executeMerge } from './actions/documentManagement/merge.operation';
+import { executeSplit } from './actions/documentManagement/split.operation';
+import { executeCompress } from './actions/documentManagement/compress.operation';
+import { executeRotate } from './actions/documentManagement/rotate.operation';
+import { executeCrop } from './actions/documentManagement/crop.operation';
+import { executeOrganize } from './actions/documentManagement/organize.operation';
+import { executeWatermark } from './actions/documentManagement/watermark.operation';
+
+// Security & Signing operations
+import { executeSign } from './actions/securitySigning/sign.operation';
+import { executeProtect } from './actions/securitySigning/protect.operation';
+import { executeUnlock } from './actions/securitySigning/unlock.operation';
+
+// PDF to Format operations
+import { executePdfToWord } from './actions/pdfToFormat/pdfToWord.operation';
+import { executePdfToExcel } from './actions/pdfToFormat/pdfToExcel.operation';
+import { executePdfToPowerpoint } from './actions/pdfToFormat/pdfToPowerpoint.operation';
+import { executePdfToImage } from './actions/pdfToFormat/pdfToImage.operation';
+
+// Format to PDF operations
+import { executeWordToPdf } from './actions/formatToPdf/wordToPdf.operation';
+import { executeExcelToPdf } from './actions/formatToPdf/excelToPdf.operation';
+import { executePowerpointToPdf } from './actions/formatToPdf/powerpointToPdf.operation';
+import { executeImageToPdf } from './actions/formatToPdf/imageToPdf.operation';
+import { executeHtmlToPdf } from './actions/formatToPdf/htmlToPdf.operation';
+import { executeMarkdownToPdf } from './actions/formatToPdf/markdownToPdf.operation';
 
 export class MorphoPdf implements INodeType {
   description: INodeTypeDescription = {
@@ -86,38 +107,58 @@ export class MorphoPdf implements INodeType {
     ],
     properties: [
       resourceProperty,
-      pdfOperationProperty,
-      convertOperationProperty,
+      documentManagementOperationProperty,
+      pdfToFormatOperationProperty,
+      formatToPdfOperationProperty,
+      securitySigningOperationProperty,
       inputMethodProperty,
       binaryPropertyNameProperty,
       fileUrlProperty,
       fileUrlsProperty,
       outputBinaryPropertyNameProperty,
-      // PDF operation parameters
+      // Document Management parameters
       qualityProperty,
       splitModeProperty,
       rangesProperty,
       rotationAngleProperty,
       rotatePagesProperty,
+      // Organize parameters
+      newPageOrderProperty,
+      // Crop parameters
+      cropModeProperty,
+      cropTopProperty,
+      cropRightProperty,
+      cropBottomProperty,
+      cropLeftProperty,
+      // Watermark parameters
       watermarkTypeProperty,
       watermarkTextProperty,
       watermarkImageUrlProperty,
       watermarkPositionProperty,
       watermarkOpacityProperty,
       watermarkRotationProperty,
+      // Security & Signing parameters
       userPasswordProperty,
       ownerPasswordProperty,
       passwordProperty,
-      // Convert operation parameters
+      // Sign parameters
+      signatureImageUrlProperty,
+      signaturePageProperty,
+      signatureXProperty,
+      signatureYProperty,
+      signatureWidthProperty,
+      signatureHeightProperty,
+      // PDF to Format parameters
       imageFormatProperty,
       dpiProperty,
       pageRangeProperty,
+      ocrForScannedProperty,
+      // Format to PDF parameters
       htmlSourceTypeProperty,
       htmlUrlProperty,
       htmlContentProperty,
       pageFormatProperty,
       landscapeProperty,
-      ocrForScannedProperty,
     ],
   };
 
@@ -129,7 +170,7 @@ export class MorphoPdf implements INodeType {
     const operation = this.getNodeParameter('operation', 0) as string;
 
     // For merge operation, process all items at once
-    if (resource === 'pdf' && operation === 'merge') {
+    if (resource === 'documentManagement' && operation === 'merge') {
       try {
         const result = await executeMerge.call(this, items);
         returnData.push(result);
@@ -151,8 +192,8 @@ export class MorphoPdf implements INodeType {
       try {
         let result: INodeExecutionData;
 
-        // PDF operations
-        if (resource === 'pdf') {
+        // Document Management operations
+        if (resource === 'documentManagement') {
           switch (operation) {
             case 'split':
               result = await executeSplit.call(this, i);
@@ -169,30 +210,18 @@ export class MorphoPdf implements INodeType {
             case 'organize':
               result = await executeOrganize.call(this, i);
               break;
-            case 'edit':
-              result = await executeEdit.call(this, i);
-              break;
-            case 'sign':
-              result = await executeSign.call(this, i);
-              break;
             case 'watermark':
               result = await executeWatermark.call(this, i);
-              break;
-            case 'protect':
-              result = await executeProtect.call(this, i);
-              break;
-            case 'unlock':
-              result = await executeUnlock.call(this, i);
               break;
             default:
               throw new NodeOperationError(
                 this.getNode(),
-                `Unsupported PDF operation: ${operation}`,
+                `Unsupported Document Management operation: ${operation}`,
               );
           }
         }
-        // Convert operations
-        else if (resource === 'convert') {
+        // PDF to Format operations
+        else if (resource === 'pdfToFormat') {
           switch (operation) {
             case 'pdfToWord':
               result = await executePdfToWord.call(this, i);
@@ -206,6 +235,16 @@ export class MorphoPdf implements INodeType {
             case 'pdfToImage':
               result = await executePdfToImage.call(this, i);
               break;
+            default:
+              throw new NodeOperationError(
+                this.getNode(),
+                `Unsupported PDF to Format operation: ${operation}`,
+              );
+          }
+        }
+        // Format to PDF operations
+        else if (resource === 'formatToPdf') {
+          switch (operation) {
             case 'wordToPdf':
               result = await executeWordToPdf.call(this, i);
               break;
@@ -227,7 +266,26 @@ export class MorphoPdf implements INodeType {
             default:
               throw new NodeOperationError(
                 this.getNode(),
-                `Unsupported convert operation: ${operation}`,
+                `Unsupported Format to PDF operation: ${operation}`,
+              );
+          }
+        }
+        // Security & Signing operations
+        else if (resource === 'securitySigning') {
+          switch (operation) {
+            case 'sign':
+              result = await executeSign.call(this, i);
+              break;
+            case 'protect':
+              result = await executeProtect.call(this, i);
+              break;
+            case 'unlock':
+              result = await executeUnlock.call(this, i);
+              break;
+            default:
+              throw new NodeOperationError(
+                this.getNode(),
+                `Unsupported Security & Signing operation: ${operation}`,
               );
           }
         } else {

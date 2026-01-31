@@ -5,28 +5,33 @@ import {
   prepareBinaryOutput,
 } from '../../shared/helpers';
 
-export async function executeEdit(
+export async function executeOrganize(
   this: IExecuteFunctions,
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
-
-  // Default: empty edits (can be extended with parameters for text, shapes, etc.)
-  const edits: unknown[] = [];
+  
+  // Get new page order from UI parameter
+  const newPageOrderInput = this.getNodeParameter('newPageOrder', itemIndex, '') as string;
+  const newPageOrder: number[] = newPageOrderInput
+    ? newPageOrderInput.split(',').map(p => parseInt(p.trim(), 10)).filter(n => !isNaN(n))
+    : [];
 
   let responseBuffer: Buffer;
 
   if (inputMethod === 'url') {
     const fileUrl = this.getNodeParameter('fileUrl', itemIndex) as string;
-    const body = {
+    const body: Record<string, unknown> = {
       url: fileUrl,
-      edits,
     };
+    if (newPageOrder.length > 0) {
+      body.newPageOrder = newPageOrder;
+    }
 
     responseBuffer = (await morphoPdfApiRequest.call(
       this,
       'POST',
-      '/pdf/edit',
+      '/pdf/organize',
       body,
     )) as Buffer;
   } else {
@@ -40,13 +45,15 @@ export async function executeEdit(
           contentType: inputFile.mimeType,
         },
       },
-      edits: JSON.stringify(edits),
     };
+    if (newPageOrder.length > 0) {
+      formData.newPageOrder = JSON.stringify(newPageOrder);
+    }
 
     responseBuffer = (await morphoPdfApiRequest.call(
       this,
       'POST',
-      '/pdf/edit',
+      '/pdf/organize',
       undefined,
       formData,
     )) as Buffer;
@@ -56,7 +63,7 @@ export async function executeEdit(
     this,
     itemIndex,
     responseBuffer,
-    'edited.pdf',
+    'organized.pdf',
     'application/pdf',
   );
 }

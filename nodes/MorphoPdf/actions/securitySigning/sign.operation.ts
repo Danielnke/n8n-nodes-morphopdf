@@ -5,18 +5,26 @@ import {
   prepareBinaryOutput,
 } from '../../shared/helpers';
 
-export async function executeCrop(
+export async function executeSign(
   this: IExecuteFunctions,
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
 
-  // Default crop margins (can be extended with parameters)
-  const cropData = {
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
+  // Get signature parameters from UI
+  const signatureImageUrl = this.getNodeParameter('signatureImageUrl', itemIndex) as string;
+  
+  if (!signatureImageUrl) {
+    throw new Error('Signature image URL is required');
+  }
+  
+  const signature = {
+    imageUrl: signatureImageUrl,
+    page: this.getNodeParameter('signaturePage', itemIndex, 1) as number,
+    x: this.getNodeParameter('signatureX', itemIndex, 100) as number,
+    y: this.getNodeParameter('signatureY', itemIndex, 100) as number,
+    width: this.getNodeParameter('signatureWidth', itemIndex, 150) as number,
+    height: this.getNodeParameter('signatureHeight', itemIndex, 50) as number,
   };
 
   let responseBuffer: Buffer;
@@ -25,14 +33,13 @@ export async function executeCrop(
     const fileUrl = this.getNodeParameter('fileUrl', itemIndex) as string;
     const body = {
       url: fileUrl,
-      cropMode: 'uniform',
-      cropData,
+      signature,
     };
 
     responseBuffer = (await morphoPdfApiRequest.call(
       this,
       'POST',
-      '/pdf/crop',
+      '/pdf/sign',
       body,
     )) as Buffer;
   } else {
@@ -46,14 +53,13 @@ export async function executeCrop(
           contentType: inputFile.mimeType,
         },
       },
-      cropMode: 'uniform',
-      cropData: JSON.stringify(cropData),
+      signature: JSON.stringify(signature),
     };
 
     responseBuffer = (await morphoPdfApiRequest.call(
       this,
       'POST',
-      '/pdf/crop',
+      '/pdf/sign',
       undefined,
       formData,
     )) as Buffer;
@@ -63,7 +69,7 @@ export async function executeCrop(
     this,
     itemIndex,
     responseBuffer,
-    'cropped.pdf',
+    'signed.pdf',
     'application/pdf',
   );
 }

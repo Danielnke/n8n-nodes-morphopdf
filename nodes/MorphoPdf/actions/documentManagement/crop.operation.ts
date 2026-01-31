@@ -5,20 +5,19 @@ import {
   prepareBinaryOutput,
 } from '../../shared/helpers';
 
-export async function executeSign(
+export async function executeCrop(
   this: IExecuteFunctions,
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
 
-  // Default signature configuration (can be extended with parameters)
-  const signature = {
-    imageUrl: '',
-    page: 1,
-    x: 100,
-    y: 100,
-    width: 150,
-    height: 50,
+  // Get crop parameters from UI
+  const cropMode = this.getNodeParameter('cropMode', itemIndex, 'uniform') as string;
+  const cropData = {
+    top: this.getNodeParameter('cropTop', itemIndex, 0) as number,
+    right: this.getNodeParameter('cropRight', itemIndex, 0) as number,
+    bottom: this.getNodeParameter('cropBottom', itemIndex, 0) as number,
+    left: this.getNodeParameter('cropLeft', itemIndex, 0) as number,
   };
 
   let responseBuffer: Buffer;
@@ -27,13 +26,14 @@ export async function executeSign(
     const fileUrl = this.getNodeParameter('fileUrl', itemIndex) as string;
     const body = {
       url: fileUrl,
-      signature,
+      cropMode,
+      cropData,
     };
 
     responseBuffer = (await morphoPdfApiRequest.call(
       this,
       'POST',
-      '/pdf/sign',
+      '/pdf/crop',
       body,
     )) as Buffer;
   } else {
@@ -47,13 +47,14 @@ export async function executeSign(
           contentType: inputFile.mimeType,
         },
       },
-      signature: JSON.stringify(signature),
+      cropMode,
+      cropData: JSON.stringify(cropData),
     };
 
     responseBuffer = (await morphoPdfApiRequest.call(
       this,
       'POST',
-      '/pdf/sign',
+      '/pdf/crop',
       undefined,
       formData,
     )) as Buffer;
@@ -63,7 +64,7 @@ export async function executeSign(
     this,
     itemIndex,
     responseBuffer,
-    'signed.pdf',
+    'cropped.pdf',
     'application/pdf',
   );
 }
