@@ -8,7 +8,7 @@ import type {
 export class MorphoPdfApi implements ICredentialType {
   name = 'morphoPdfApi';
   displayName = 'MorphoPDF API';
-  documentationUrl = 'https://docs.morphopdf.com/api';
+  documentationUrl = 'https://docs.morphopdf.com';
   icon = 'file:../nodes/MorphoPdf/morphopdf.svg' as const;
 
   properties: INodeProperties[] = [
