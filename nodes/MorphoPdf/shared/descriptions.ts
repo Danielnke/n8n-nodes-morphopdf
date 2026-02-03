@@ -132,6 +132,11 @@ export const inputMethodProperty: INodeProperties = {
   displayName: 'Input Method',
   name: 'inputMethod',
   type: 'options',
+  displayOptions: {
+    hide: {
+      operation: ['htmlToPdf', 'markdownToPdf'],
+    },
+  },
   options: [
     {
       name: 'Binary Data',
@@ -1046,7 +1051,7 @@ export const signaturesJsonProperty: INodeProperties = {
  */
 export const markdownInputMethodProperty: INodeProperties = {
   displayName: 'Input Method',
-  name: 'inputMethod',
+  name: 'markdownInputMethod',
   type: 'options',
   displayOptions: {
     show: {
@@ -1084,12 +1089,31 @@ export const markdownContentProperty: INodeProperties = {
     show: {
       resource: ['formatToPdf'],
       operation: ['markdownToPdf'],
-      inputMethod: ['text'],
+      markdownInputMethod: ['text'],
     },
   },
   default: '',
   placeholder: '# Hello World\n\nThis is **bold** and *italic* text.',
   description: 'Raw Markdown content to convert to PDF',
+};
+
+/**
+ * Markdown Binary Property Name (for file upload)
+ */
+export const markdownBinaryPropertyNameProperty: INodeProperties = {
+  displayName: 'Input Binary Property',
+  name: 'binaryPropertyName',
+  type: 'string',
+  default: 'data',
+  displayOptions: {
+    show: {
+      resource: ['formatToPdf'],
+      operation: ['markdownToPdf'],
+      markdownInputMethod: ['binary'],
+    },
+  },
+  description: 'Name of the binary property containing the markdown file',
+  hint: 'The property name from a previous node (e.g., "data" from HTTP Request)',
 };
 
 // ----------------------------------------------------------------------------

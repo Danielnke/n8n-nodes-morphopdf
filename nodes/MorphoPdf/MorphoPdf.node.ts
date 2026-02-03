@@ -53,6 +53,7 @@ import {
   // Markdown to PDF
   markdownInputMethodProperty,
   markdownContentProperty,
+  markdownBinaryPropertyNameProperty,
   // New properties for enhanced operations (Tasks 9-13)
   // PDF to Image - JPEG quality
   jpegQualityProperty,
@@ -200,6 +201,7 @@ export class MorphoPdf implements INodeType {
       // Markdown to PDF parameters
       markdownInputMethodProperty,
       markdownContentProperty,
+      markdownBinaryPropertyNameProperty,
       // New enhanced properties (Tasks 9-13)
       // PDF to Image - JPEG quality (only for JPEG format)
       jpegQualityProperty,

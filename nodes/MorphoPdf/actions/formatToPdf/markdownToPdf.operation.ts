@@ -9,7 +9,7 @@ export async function executeMarkdownToPdf(
   this: IExecuteFunctions,
   itemIndex: number,
 ): Promise<INodeExecutionData> {
-  const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
+  const inputMethod = this.getNodeParameter('markdownInputMethod', itemIndex) as string;
   const pageFormat = this.getNodeParameter('pageFormat', itemIndex, 'A4') as string;
   const landscape = this.getNodeParameter('landscape', itemIndex, false) as boolean;
 
