@@ -1283,7 +1283,7 @@ export const forceBrowserRenderingProperty: INodeProperties = {
     },
   },
   default: false,
-  description: 'Force Puppeteer/Chromium instead of wkhtmltopdf for rendering',
+  description: 'Whether to force Puppeteer/Chromium instead of wkhtmltopdf for rendering',
 };
 
 // ----------------------------------------------------------------------------
@@ -1408,7 +1408,7 @@ export const permModifyingProperty: INodeProperties = {
     },
   },
   default: true,
-  description: 'Allow document modification',
+  description: 'Whether to allow document modification',
 };
 
 /**
@@ -1425,7 +1425,7 @@ export const permCopyingProperty: INodeProperties = {
     },
   },
   default: true,
-  description: 'Allow copying text and images',
+  description: 'Whether to allow copying text and images',
 };
 
 /**
@@ -1442,7 +1442,7 @@ export const permAnnotatingProperty: INodeProperties = {
     },
   },
   default: true,
-  description: 'Allow adding comments and annotations',
+  description: 'Whether to allow adding comments and annotations',
 };
 
 /**
@@ -1459,7 +1459,7 @@ export const permFillingFormsProperty: INodeProperties = {
     },
   },
   default: true,
-  description: 'Allow filling in form fields',
+  description: 'Whether to allow filling in form fields',
 };
 
 /**
@@ -1476,7 +1476,7 @@ export const permContentAccessibilityProperty: INodeProperties = {
     },
   },
   default: true,
-  description: 'Enable content access for screen readers',
+  description: 'Whether to enable content access for screen readers',
 };
 
 /**
@@ -1493,7 +1493,7 @@ export const permDocumentAssemblyProperty: INodeProperties = {
     },
   },
   default: true,
-  description: 'Allow inserting, rotating, or deleting pages',
+  description: 'Whether to allow inserting, rotating, or deleting pages',
 };
 
 // ----------------------------------------------------------------------------

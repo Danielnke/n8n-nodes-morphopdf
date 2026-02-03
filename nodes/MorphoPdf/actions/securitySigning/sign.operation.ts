@@ -9,15 +9,14 @@ import {
  * Fetches an image from URL and converts it to base64
  */
 async function fetchImageAsBase64(this: IExecuteFunctions, url: string): Promise<string> {
-  const response = await this.helpers.request({
+  const response = await this.helpers.httpRequest({
     method: 'GET',
     url,
-    encoding: null, // Get raw buffer
-    resolveWithFullResponse: true,
+    encoding: 'arraybuffer',
+    returnFullResponse: false,
   });
-  
-  const buffer = Buffer.from(response.body);
-  return buffer.toString('base64');
+
+  return Buffer.from(response as ArrayBuffer).toString('base64');
 }
 
 export async function executeSign(
