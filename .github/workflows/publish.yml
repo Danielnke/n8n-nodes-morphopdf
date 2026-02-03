@@ -51,6 +51,14 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      # For push to main - auto bump patch version
+      - name: Bump version (push to main)
+        if: github.event_name == 'push'
+        run: |
+          npm version patch -m "chore: release v%s"
+          git push
+          git push --tags
+
       # For manual workflow dispatch - bump version
       - name: Bump version (manual trigger)
         if: github.event_name == 'workflow_dispatch'
