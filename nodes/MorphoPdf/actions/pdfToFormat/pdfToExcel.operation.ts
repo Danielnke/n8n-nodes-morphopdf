@@ -10,12 +10,25 @@ export async function executePdfToExcel(
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
+  const mode = this.getNodeParameter('excelMode', itemIndex, 'convert') as string;
+  const regionsJson = this.getNodeParameter('excelRegions', itemIndex, '') as string;
+  let regions: Array<{x: number; y: number; width: number; height: number; page?: number}> | undefined;
+  if (regionsJson) {
+    try {
+      regions = JSON.parse(regionsJson);
+    } catch {
+      throw new Error('Invalid JSON format for regions. Expected array of objects with x, y, width, height, and optional page properties.');
+    }
+  }
 
   let responseBuffer: Buffer;
 
   if (inputMethod === 'url') {
     const fileUrl = this.getNodeParameter('fileUrl', itemIndex) as string;
-    const body = { url: fileUrl };
+    const body: Record<string, unknown> = { url: fileUrl, mode };
+    if (regions) {
+      body.regions = regions;
+    }
 
     responseBuffer = (await morphoPdfApiRequest.call(
       this,
@@ -34,7 +47,11 @@ export async function executePdfToExcel(
           contentType: inputFile.mimeType,
         },
       },
+      mode,
     };
+    if (regions) {
+      formData.regions = JSON.stringify(regions);
+    }
 
     responseBuffer = (await morphoPdfApiRequest.call(
       this,

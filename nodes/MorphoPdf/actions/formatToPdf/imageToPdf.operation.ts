@@ -10,12 +10,22 @@ export async function executeImageToPdf(
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
+  
+  // Get PDF options
+  const pageSize = this.getNodeParameter('imageToPdfPageSize', itemIndex, 'A4') as string;
+  const margin = this.getNodeParameter('imageToPdfMargin', itemIndex, 36) as number;
+  const backgroundColor = this.getNodeParameter('backgroundColor', itemIndex, '#FFFFFF') as string;
 
   let responseBuffer: Buffer;
 
   if (inputMethod === 'url') {
     const fileUrl = this.getNodeParameter('fileUrl', itemIndex) as string;
-    const body = { urls: [fileUrl] };
+    const body = {
+      urls: [fileUrl],
+      pageSize,
+      margin,
+      backgroundColor,
+    };
 
     responseBuffer = (await morphoPdfApiRequest.call(
       this,
@@ -32,7 +42,12 @@ export async function executeImageToPdf(
       throw new Error('At least one image is required');
     }
 
-    const formData: Record<string, unknown> = {};
+    const formData: Record<string, unknown> = {
+      pageSize,
+      margin: margin.toString(),
+      backgroundColor,
+    };
+    
     files.forEach((file, index) => {
       formData[`file${index}`] = {
         value: file.content,

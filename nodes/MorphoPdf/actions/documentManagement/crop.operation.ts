@@ -12,13 +12,37 @@ export async function executeCrop(
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
 
   // Get crop parameters from UI
-  const cropMode = this.getNodeParameter('cropMode', itemIndex, 'uniform') as string;
-  const cropData = {
-    top: this.getNodeParameter('cropTop', itemIndex, 0) as number,
-    right: this.getNodeParameter('cropRight', itemIndex, 0) as number,
-    bottom: this.getNodeParameter('cropBottom', itemIndex, 0) as number,
-    left: this.getNodeParameter('cropLeft', itemIndex, 0) as number,
-  };
+  // cropMode: 'all' applies first cropData entry to all pages
+  // cropMode: 'single' applies each entry to its specified page (only those pages appear in output)
+  const cropMode = this.getNodeParameter('cropMode', itemIndex, 'all') as string;
+  
+  // cropData is now a JSON string defining region-based crop areas
+  // Format: [{ pageNumber: 1, cropArea: { x, y, width, height, unit } }]
+  const cropDataJson = this.getNodeParameter('cropData', itemIndex, '[]') as string;
+  
+  // Parse and validate cropData
+  let cropData: Array<{ pageNumber: number; cropArea: { x: number; y: number; width: number; height: number; unit?: string } }>;
+  try {
+    cropData = JSON.parse(cropDataJson);
+    if (!Array.isArray(cropData) || cropData.length === 0) {
+      throw new Error('cropData must be a non-empty array');
+    }
+    // Validate structure
+    for (const item of cropData) {
+      if (typeof item.pageNumber !== 'number' || !item.cropArea) {
+        throw new Error('Each cropData item must have pageNumber (number) and cropArea (object)');
+      }
+      const { x, y, width, height } = item.cropArea;
+      if (typeof x !== 'number' || typeof y !== 'number' || typeof width !== 'number' || typeof height !== 'number') {
+        throw new Error('cropArea must have x, y, width, height (all numbers)');
+      }
+    }
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new Error(`Invalid cropData JSON: ${error.message}. Expected format: [{"pageNumber": 1, "cropArea": {"x": 50, "y": 50, "width": 500, "height": 700, "unit": "pt"}}]`);
+    }
+    throw error;
+  }
 
   let responseBuffer: Buffer;
 
@@ -39,6 +63,7 @@ export async function executeCrop(
   } else {
     const inputFile = await getInputFile.call(this, itemIndex);
 
+    // For multipart form data, cropData must be sent as JSON string
     const formData: Record<string, unknown> = {
       file: {
         value: inputFile.content,

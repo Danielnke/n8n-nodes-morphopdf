@@ -13,12 +13,16 @@ export async function executePdfToImage(
   const format = this.getNodeParameter('imageFormat', itemIndex, 'png') as string;
   const dpi = this.getNodeParameter('dpi', itemIndex, 150) as number;
   const pageRange = this.getNodeParameter('pageRange', itemIndex, 'all') as string;
+  const quality = this.getNodeParameter('jpegQuality', itemIndex, 85) as number;
 
   let responseBuffer: Buffer;
 
   if (inputMethod === 'url') {
     const fileUrl = this.getNodeParameter('fileUrl', itemIndex) as string;
-    const body = { url: fileUrl, format, dpi, pageRange };
+    const body: Record<string, unknown> = { url: fileUrl, format, dpi, pageRange };
+    if (format === 'jpg') {
+      body.quality = quality;
+    }
 
     responseBuffer = (await morphoPdfApiRequest.call(
       this,
@@ -41,6 +45,9 @@ export async function executePdfToImage(
       dpi: String(dpi),
       pageRange,
     };
+    if (format === 'jpg') {
+      formData.quality = String(quality);
+    }
 
     responseBuffer = (await morphoPdfApiRequest.call(
       this,

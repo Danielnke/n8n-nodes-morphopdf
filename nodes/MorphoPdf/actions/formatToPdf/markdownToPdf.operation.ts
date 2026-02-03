@@ -22,9 +22,17 @@ export async function executeMarkdownToPdf(
 
   let responseBuffer: Buffer;
 
-  if (inputMethod === 'url') {
-    const fileUrl = this.getNodeParameter('fileUrl', itemIndex) as string;
-    const body = { url: fileUrl, options };
+  if (inputMethod === 'text') {
+    // Raw markdown text input - send as JSON body
+    const markdownContent = this.getNodeParameter('markdownContent', itemIndex, '') as string;
+    if (!markdownContent) {
+      throw new Error('Markdown Content is required when using Raw Text input method');
+    }
+
+    const body = {
+      markdown: markdownContent,
+      options,
+    };
 
     responseBuffer = (await morphoPdfApiRequest.call(
       this,
@@ -33,6 +41,7 @@ export async function executeMarkdownToPdf(
       body,
     )) as Buffer;
   } else {
+    // Binary data input - send as multipart form
     const inputFile = await getInputFile.call(this, itemIndex);
 
     const formData: Record<string, unknown> = {

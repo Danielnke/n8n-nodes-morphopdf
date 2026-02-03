@@ -10,11 +10,17 @@ export async function executeOrganize(
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
-  
+
   // Get new page order from UI parameter
   const newPageOrderInput = this.getNodeParameter('newPageOrder', itemIndex, '') as string;
   const newPageOrder: number[] = newPageOrderInput
     ? newPageOrderInput.split(',').map(p => parseInt(p.trim(), 10)).filter(n => !isNaN(n))
+    : [];
+
+  // Get rotated pages (pages to rotate 90° clockwise)
+  const rotatedPagesInput = this.getNodeParameter('rotatedPages', itemIndex, '') as string;
+  const rotatedPages: number[] = rotatedPagesInput
+    ? rotatedPagesInput.split(',').map(p => parseInt(p.trim(), 10)).filter(n => !isNaN(n))
     : [];
 
   let responseBuffer: Buffer;
@@ -26,6 +32,9 @@ export async function executeOrganize(
     };
     if (newPageOrder.length > 0) {
       body.newPageOrder = newPageOrder;
+    }
+    if (rotatedPages.length > 0) {
+      body.rotatedPages = rotatedPages;
     }
 
     responseBuffer = (await morphoPdfApiRequest.call(
@@ -48,6 +57,9 @@ export async function executeOrganize(
     };
     if (newPageOrder.length > 0) {
       formData.newPageOrder = JSON.stringify(newPageOrder);
+    }
+    if (rotatedPages.length > 0) {
+      formData.rotatedPages = JSON.stringify(rotatedPages);
     }
 
     responseBuffer = (await morphoPdfApiRequest.call(

@@ -11,9 +11,15 @@ export async function executeSplit(
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
   const splitMode = this.getNodeParameter('splitMode', itemIndex) as string;
-  const ranges = splitMode === 'ranges' 
-    ? this.getNodeParameter('ranges', itemIndex) as string 
+  const ranges = splitMode === 'ranges'
+    ? this.getNodeParameter('ranges', itemIndex) as string
     : undefined;
+  const pageNumbersInput = splitMode === 'individual'
+    ? this.getNodeParameter('pageNumbers', itemIndex, '') as string
+    : undefined;
+  const pageNumbers = pageNumbersInput
+    ? pageNumbersInput.split(',').map(p => parseInt(p.trim(), 10)).filter(n => !isNaN(n))
+    : [];
 
   let responseBuffer: Buffer;
 
@@ -25,6 +31,9 @@ export async function executeSplit(
     };
     if (ranges) {
       body.ranges = ranges;
+    }
+    if (pageNumbers.length > 0) {
+      body.pageNumbers = pageNumbers;
     }
 
     responseBuffer = (await morphoPdfApiRequest.call(
@@ -48,6 +57,9 @@ export async function executeSplit(
     };
     if (ranges) {
       formData.ranges = ranges;
+    }
+    if (pageNumbers.length > 0) {
+      formData.pageNumbers = JSON.stringify(pageNumbers);
     }
 
     responseBuffer = (await morphoPdfApiRequest.call(

@@ -13,10 +13,12 @@ export async function executeWatermark(
   const watermarkType = this.getNodeParameter('watermarkType', itemIndex) as string;
   const position = this.getNodeParameter('watermarkPosition', itemIndex) as string;
   const opacity = this.getNodeParameter('watermarkOpacity', itemIndex) as number;
+  
+  // Pages to watermark (all, 1,3,5, or 1-5)
+  const pages = this.getNodeParameter('watermarkPages', itemIndex, 'all') as string;
 
   // Build watermark options
   const watermarkOptions: Record<string, unknown> = {
-    type: watermarkType,
     position,
     opacity,
   };
@@ -24,8 +26,21 @@ export async function executeWatermark(
   if (watermarkType === 'text') {
     watermarkOptions.text = this.getNodeParameter('watermarkText', itemIndex) as string;
     watermarkOptions.rotation = this.getNodeParameter('watermarkRotation', itemIndex) as number;
+    watermarkOptions.fontSize = this.getNodeParameter('watermarkFontSize', itemIndex, 48) as number;
+    watermarkOptions.color = this.getNodeParameter('watermarkColor', itemIndex, '#000000') as string;
   } else {
     watermarkOptions.imageUrl = this.getNodeParameter('watermarkImageUrl', itemIndex) as string;
+    
+    // Width and height are optional for image watermarks
+    const width = this.getNodeParameter('watermarkWidth', itemIndex, '') as string;
+    const height = this.getNodeParameter('watermarkHeight', itemIndex, '') as string;
+    
+    if (width) {
+      watermarkOptions.width = parseInt(width, 10);
+    }
+    if (height) {
+      watermarkOptions.height = parseInt(height, 10);
+    }
   }
 
   let responseBuffer: Buffer;
@@ -35,6 +50,7 @@ export async function executeWatermark(
     const body = {
       url: fileUrl,
       watermarkType,
+      pages,
       watermarkOptions,
     };
 
@@ -56,6 +72,7 @@ export async function executeWatermark(
         },
       },
       watermarkType,
+      pages,
       watermarkOptions: JSON.stringify(watermarkOptions),
     };
 

@@ -17,7 +17,6 @@ import {
   fileUrlProperty,
   fileUrlsProperty,
   outputBinaryPropertyNameProperty,
-  qualityProperty,
   splitModeProperty,
   rangesProperty,
   rotationAngleProperty,
@@ -37,22 +36,65 @@ import {
   htmlSourceTypeProperty,
   htmlUrlProperty,
   htmlContentProperty,
+  htmlBinaryPropertyNameProperty,
   pageFormatProperty,
   landscapeProperty,
   ocrForScannedProperty,
   // New properties for organize, crop, and sign
   newPageOrderProperty,
   cropModeProperty,
-  cropTopProperty,
-  cropRightProperty,
-  cropBottomProperty,
-  cropLeftProperty,
+  cropDataProperty,
+  // Sign properties - new API structure
+  signerNameProperty,
+  signatureInputTypeProperty,
   signatureImageUrlProperty,
-  signaturePageProperty,
-  signatureXProperty,
-  signatureYProperty,
-  signatureWidthProperty,
-  signatureHeightProperty,
+  signatureDataProperty,
+  signaturesJsonProperty,
+  // Markdown to PDF
+  markdownInputMethodProperty,
+  markdownContentProperty,
+  // New properties for enhanced operations (Tasks 9-13)
+  // PDF to Image - JPEG quality
+  jpegQualityProperty,
+  // Split PDF - page numbers for individual mode
+  pageNumbersProperty,
+  // Rotate PDF - per-page rotations (use rotationsProperty)
+  rotationsProperty,
+  // Organize PDF - rotated pages
+  rotatedPagesProperty,
+  // PDF to Excel - mode and regions
+  excelModeProperty,
+  excelRegionsProperty,
+  // HTML to PDF - extended options
+  printBackgroundProperty,
+  scaleProperty,
+  marginTopProperty,
+  marginRightProperty,
+  marginBottomProperty,
+  marginLeftProperty,
+  waitUntilProperty,
+  timeoutProperty,
+  waitForSelectorProperty,
+  forceBrowserRenderingProperty,
+  // Image to PDF - extended options
+  imageToPdfPageSizeProperty,
+  imageToPdfMarginProperty,
+  backgroundColorProperty,
+  imageOrderProperty,
+  // Protect PDF - encryption level and permissions
+  encryptionLevelProperty,
+  permModifyingProperty,
+  permCopyingProperty,
+  permAnnotatingProperty,
+  permFillingFormsProperty,
+  permContentAccessibilityProperty,
+  permDocumentAssemblyProperty,
+  // Watermark - extended options
+  watermarkFontSizeProperty,
+  watermarkColorProperty,
+  watermarkWidthProperty,
+  watermarkHeightProperty,
+  watermarkPagesProperty,
 } from './shared/descriptions';
 
 // Document Management operations
@@ -117,19 +159,15 @@ export class MorphoPdf implements INodeType {
       fileUrlsProperty,
       outputBinaryPropertyNameProperty,
       // Document Management parameters
-      qualityProperty,
       splitModeProperty,
       rangesProperty,
       rotationAngleProperty,
       rotatePagesProperty,
       // Organize parameters
       newPageOrderProperty,
-      // Crop parameters
+      // Crop parameters - region-based (new API structure)
       cropModeProperty,
-      cropTopProperty,
-      cropRightProperty,
-      cropBottomProperty,
-      cropLeftProperty,
+      cropDataProperty,
       // Watermark parameters
       watermarkTypeProperty,
       watermarkTextProperty,
@@ -141,13 +179,12 @@ export class MorphoPdf implements INodeType {
       userPasswordProperty,
       ownerPasswordProperty,
       passwordProperty,
-      // Sign parameters
+      // Sign parameters - new API structure (signerName, signatureData, signatures array)
+      signerNameProperty,
+      signatureInputTypeProperty,
       signatureImageUrlProperty,
-      signaturePageProperty,
-      signatureXProperty,
-      signatureYProperty,
-      signatureWidthProperty,
-      signatureHeightProperty,
+      signatureDataProperty,
+      signaturesJsonProperty,
       // PDF to Format parameters
       imageFormatProperty,
       dpiProperty,
@@ -157,8 +194,54 @@ export class MorphoPdf implements INodeType {
       htmlSourceTypeProperty,
       htmlUrlProperty,
       htmlContentProperty,
+      htmlBinaryPropertyNameProperty,
       pageFormatProperty,
       landscapeProperty,
+      // Markdown to PDF parameters
+      markdownInputMethodProperty,
+      markdownContentProperty,
+      // New enhanced properties (Tasks 9-13)
+      // PDF to Image - JPEG quality (only for JPEG format)
+      jpegQualityProperty,
+      // Split PDF - page numbers for individual mode
+      pageNumbersProperty,
+      // Rotate PDF - per-page rotations
+      rotationsProperty,
+      // Organize PDF - rotated pages array
+      rotatedPagesProperty,
+      // PDF to Excel - mode and regions
+      excelModeProperty,
+      excelRegionsProperty,
+      // HTML to PDF - extended PDF options
+      printBackgroundProperty,
+      scaleProperty,
+      marginTopProperty,
+      marginRightProperty,
+      marginBottomProperty,
+      marginLeftProperty,
+      waitUntilProperty,
+      timeoutProperty,
+      waitForSelectorProperty,
+      forceBrowserRenderingProperty,
+      // Image to PDF - extended options
+      imageToPdfPageSizeProperty,
+      imageToPdfMarginProperty,
+      backgroundColorProperty,
+      imageOrderProperty,
+      // Protect PDF - encryption level and permissions
+      encryptionLevelProperty,
+      permModifyingProperty,
+      permCopyingProperty,
+      permAnnotatingProperty,
+      permFillingFormsProperty,
+      permContentAccessibilityProperty,
+      permDocumentAssemblyProperty,
+      // Watermark - extended options
+      watermarkFontSizeProperty,
+      watermarkColorProperty,
+      watermarkWidthProperty,
+      watermarkHeightProperty,
+      watermarkPagesProperty,
     ],
   };
 

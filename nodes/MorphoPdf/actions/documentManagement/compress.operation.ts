@@ -10,13 +10,12 @@ export async function executeCompress(
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
-  const quality = this.getNodeParameter('quality', itemIndex) as string;
 
   let responseBuffer: Buffer;
 
   if (inputMethod === 'url') {
     const fileUrl = this.getNodeParameter('fileUrl', itemIndex) as string;
-    const body = { url: fileUrl, quality };
+    const body = { url: fileUrl };
 
     responseBuffer = (await morphoPdfApiRequest.call(
       this,
@@ -35,7 +34,6 @@ export async function executeCompress(
           contentType: inputFile.mimeType,
         },
       },
-      quality,
     };
 
     responseBuffer = (await morphoPdfApiRequest.call(
