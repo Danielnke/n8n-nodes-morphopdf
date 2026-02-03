@@ -82,8 +82,18 @@ export async function morphoPdfApiRequest(
 export async function getInputFile(
   this: IExecuteFunctions,
   itemIndex: number,
+  forcedInputMethod?: string,
 ): Promise<InputFile> {
-  const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
+  // If forcedInputMethod is provided (e.g. for HTML/Markdown), use it
+  // Otherwise try to get 'inputMethod' parameter, defaulting to 'binary' if not found
+  let inputMethod = forcedInputMethod;
+  if (!inputMethod) {
+    try {
+      inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
+    } catch {
+      inputMethod = 'binary';
+    }
+  }
 
   if (inputMethod === 'binary') {
     const binaryPropertyName = this.getNodeParameter(

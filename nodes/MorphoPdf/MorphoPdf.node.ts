@@ -149,72 +149,96 @@ export class MorphoPdf implements INodeType {
       },
     ],
     properties: [
+      // 1. Resource & Operation Selection
       resourceProperty,
       documentManagementOperationProperty,
       pdfToFormatOperationProperty,
       formatToPdfOperationProperty,
       securitySigningOperationProperty,
+
+      // 2. Input Configuration (Input Method & Source)
+      // Global Input Method (Hidden for HTML/Markdown)
       inputMethodProperty,
-      binaryPropertyNameProperty,
+      // HTML Input Method
+      htmlSourceTypeProperty,
+      // Markdown Input Method
+      markdownInputMethodProperty,
+      
+      // 3. Input Fields (URLs, Content, File Properties)
+      // Global File URL
       fileUrlProperty,
+      // Multiple File URLs (Merge)
       fileUrlsProperty,
-      outputBinaryPropertyNameProperty,
-      // Document Management parameters
+      // HTML Inputs
+      htmlUrlProperty,
+      htmlContentProperty,
+      // Markdown Inputs
+      markdownContentProperty,
+      
+      // Binary Property Names
+      binaryPropertyNameProperty,
+      htmlBinaryPropertyNameProperty,
+      markdownBinaryPropertyNameProperty,
+
+      // 4. Operation Parameters
+      // Document Management
       splitModeProperty,
       rangesProperty,
+      pageNumbersProperty,
+      
       rotationAngleProperty,
       rotatePagesProperty,
-      // Organize parameters
+      rotationsProperty,
+      
       newPageOrderProperty,
-      // Crop parameters - region-based (new API structure)
+      rotatedPagesProperty,
+      
       cropModeProperty,
       cropDataProperty,
-      // Watermark parameters
+      
+      // Watermark
       watermarkTypeProperty,
       watermarkTextProperty,
       watermarkImageUrlProperty,
       watermarkPositionProperty,
       watermarkOpacityProperty,
       watermarkRotationProperty,
-      // Security & Signing parameters
+      watermarkFontSizeProperty,
+      watermarkColorProperty,
+      watermarkWidthProperty,
+      watermarkHeightProperty,
+      watermarkPagesProperty,
+      
+      // Security & Signing
       userPasswordProperty,
       ownerPasswordProperty,
       passwordProperty,
-      // Sign parameters - new API structure (signerName, signatureData, signatures array)
       signerNameProperty,
       signatureInputTypeProperty,
       signatureImageUrlProperty,
       signatureDataProperty,
       signaturesJsonProperty,
-      // PDF to Format parameters
+      encryptionLevelProperty,
+      permModifyingProperty,
+      permCopyingProperty,
+      permAnnotatingProperty,
+      permFillingFormsProperty,
+      permContentAccessibilityProperty,
+      permDocumentAssemblyProperty,
+      
+      // PDF to Format
       imageFormatProperty,
       dpiProperty,
+      jpegQualityProperty,
       pageRangeProperty,
       ocrForScannedProperty,
-      // Format to PDF parameters
-      htmlSourceTypeProperty,
-      htmlUrlProperty,
-      htmlContentProperty,
-      htmlBinaryPropertyNameProperty,
-      pageFormatProperty,
-      landscapeProperty,
-      // Markdown to PDF parameters
-      markdownInputMethodProperty,
-      markdownContentProperty,
-      markdownBinaryPropertyNameProperty,
-      // New enhanced properties (Tasks 9-13)
-      // PDF to Image - JPEG quality (only for JPEG format)
-      jpegQualityProperty,
-      // Split PDF - page numbers for individual mode
-      pageNumbersProperty,
-      // Rotate PDF - per-page rotations
-      rotationsProperty,
-      // Organize PDF - rotated pages array
-      rotatedPagesProperty,
-      // PDF to Excel - mode and regions
       excelModeProperty,
       excelRegionsProperty,
-      // HTML to PDF - extended PDF options
+      
+      // Format to PDF
+      pageFormatProperty,
+      landscapeProperty,
+      // HTML to PDF options
       printBackgroundProperty,
       scaleProperty,
       marginTopProperty,
@@ -225,25 +249,14 @@ export class MorphoPdf implements INodeType {
       timeoutProperty,
       waitForSelectorProperty,
       forceBrowserRenderingProperty,
-      // Image to PDF - extended options
+      // Image to PDF options
       imageToPdfPageSizeProperty,
       imageToPdfMarginProperty,
       backgroundColorProperty,
       imageOrderProperty,
-      // Protect PDF - encryption level and permissions
-      encryptionLevelProperty,
-      permModifyingProperty,
-      permCopyingProperty,
-      permAnnotatingProperty,
-      permFillingFormsProperty,
-      permContentAccessibilityProperty,
-      permDocumentAssemblyProperty,
-      // Watermark - extended options
-      watermarkFontSizeProperty,
-      watermarkColorProperty,
-      watermarkWidthProperty,
-      watermarkHeightProperty,
-      watermarkPagesProperty,
+
+      // 5. Output Configuration (Last)
+      outputBinaryPropertyNameProperty,
     ],
   };
 

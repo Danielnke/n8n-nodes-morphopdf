@@ -71,7 +71,7 @@ export async function executeHtmlToPdf(
     )) as Buffer;
   } else if (htmlSourceType === 'binary') {
     // Binary input - upload HTML file
-    const inputFile = await getInputFile.call(this, itemIndex);
+    const inputFile = await getInputFile.call(this, itemIndex, 'binary');
 
     const formData: Record<string, unknown> = {
       file: {

@@ -42,7 +42,7 @@ export async function executeMarkdownToPdf(
     )) as Buffer;
   } else {
     // Binary data input - send as multipart form
-    const inputFile = await getInputFile.call(this, itemIndex);
+    const inputFile = await getInputFile.call(this, itemIndex, 'binary');
 
     const formData: Record<string, unknown> = {
       file: {
