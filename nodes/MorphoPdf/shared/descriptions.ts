@@ -1066,7 +1066,7 @@ export const markdownInputMethodProperty: INodeProperties = {
       description: 'Use markdown file from a previous node',
     },
     {
-      name: 'Raw Text',
+      name: 'Raw Markdown',
       value: 'text',
       description: 'Enter markdown content directly',
     },
