@@ -1047,7 +1047,7 @@ export const signaturesJsonProperty: INodeProperties = {
 // ----------------------------------------------------------------------------
 
 /**
- * Markdown Input Method - Binary or Text (URL removed - not supported by API)
+ * Markdown Input Method - Binary, Text, or URL
  */
 export const markdownInputMethodProperty: INodeProperties = {
   displayName: 'Input Method',
@@ -1069,6 +1069,11 @@ export const markdownInputMethodProperty: INodeProperties = {
       name: 'Raw Markdown',
       value: 'text',
       description: 'Enter markdown content directly',
+    },
+    {
+      name: 'URL',
+      value: 'url',
+      description: 'Fetch markdown file from a public URL',
     },
   ],
   default: 'binary',
@@ -1114,6 +1119,25 @@ export const markdownBinaryPropertyNameProperty: INodeProperties = {
   },
   description: 'Name of the binary property containing the markdown file',
   hint: 'The property name from a previous node (e.g., "data" from HTTP Request)',
+};
+
+/**
+ * Markdown URL (for URL input)
+ */
+export const markdownUrlProperty: INodeProperties = {
+  displayName: 'Markdown File URL',
+  name: 'markdownUrl',
+  type: 'string',
+  displayOptions: {
+    show: {
+      resource: ['formatToPdf'],
+      operation: ['markdownToPdf'],
+      markdownInputMethod: ['url'],
+    },
+  },
+  default: '',
+  placeholder: 'https://example.com/document.md',
+  description: 'URL of the markdown file to fetch and convert',
 };
 
 // ----------------------------------------------------------------------------

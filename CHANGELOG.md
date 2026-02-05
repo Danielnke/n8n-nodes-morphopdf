@@ -10,6 +10,10 @@ All notable changes to this project will be documented in this file.
   - Implemented native multipart form data construction using Buffer concatenation
   - All file upload operations now use custom boundary-based multipart serialization
   - Fully compatible with n8n Cloud's strict mode linting
+- **Markdown to PDF Tool**: Added missing URL input method
+  - Now supports three input methods: Binary Data, Raw Markdown, and URL
+  - URL method fetches markdown content from a public URL and converts to PDF
+  - Raw Markdown method correctly sends content as JSON with `markdown` field
 
 ### Removed
 - `form-data` package dependency (replaced with native implementation)

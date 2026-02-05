@@ -54,6 +54,7 @@ import {
   markdownInputMethodProperty,
   markdownContentProperty,
   markdownBinaryPropertyNameProperty,
+  markdownUrlProperty,
   // New properties for enhanced operations (Tasks 9-13)
   // PDF to Image - JPEG quality
   jpegQualityProperty,
@@ -163,7 +164,7 @@ export class MorphoPdf implements INodeType {
       htmlSourceTypeProperty,
       // Markdown Input Method
       markdownInputMethodProperty,
-      
+
       // 3. Input Fields (URLs, Content, File Properties)
       // Global File URL
       fileUrlProperty,
@@ -174,7 +175,8 @@ export class MorphoPdf implements INodeType {
       htmlContentProperty,
       // Markdown Inputs
       markdownContentProperty,
-      
+      markdownUrlProperty,
+
       // Binary Property Names
       binaryPropertyNameProperty,
       htmlBinaryPropertyNameProperty,
@@ -185,17 +187,17 @@ export class MorphoPdf implements INodeType {
       splitModeProperty,
       rangesProperty,
       pageNumbersProperty,
-      
+
       rotationAngleProperty,
       rotatePagesProperty,
       rotationsProperty,
-      
+
       newPageOrderProperty,
       rotatedPagesProperty,
-      
+
       cropModeProperty,
       cropDataProperty,
-      
+
       // Watermark
       watermarkTypeProperty,
       watermarkTextProperty,
@@ -208,7 +210,7 @@ export class MorphoPdf implements INodeType {
       watermarkWidthProperty,
       watermarkHeightProperty,
       watermarkPagesProperty,
-      
+
       // Security & Signing
       userPasswordProperty,
       ownerPasswordProperty,
@@ -225,7 +227,7 @@ export class MorphoPdf implements INodeType {
       permFillingFormsProperty,
       permContentAccessibilityProperty,
       permDocumentAssemblyProperty,
-      
+
       // PDF to Format
       imageFormatProperty,
       dpiProperty,
@@ -234,7 +236,7 @@ export class MorphoPdf implements INodeType {
       ocrForScannedProperty,
       excelModeProperty,
       excelRegionsProperty,
-      
+
       // Format to PDF
       pageFormatProperty,
       landscapeProperty,
