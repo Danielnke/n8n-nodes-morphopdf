@@ -5,6 +5,32 @@ import {
   prepareOutput,
 } from '../../shared/helpers';
 
+/**
+ * Normalize URL array from n8n's multipleValues parameter
+ * Handles various formats: string, array of strings, nested arrays
+ */
+function normalizeUrls(urlsParam: unknown): string[] {
+  if (!urlsParam) return [];
+
+  // If it's a string, split by comma or newline
+  if (typeof urlsParam === 'string') {
+    return urlsParam
+      .split(/[,\n]/)
+      .map((url) => url.trim())
+      .filter((url) => url.length > 0);
+  }
+
+  // If it's an array, flatten and filter
+  if (Array.isArray(urlsParam)) {
+    return urlsParam
+      .flat()
+      .map((url) => (typeof url === 'string' ? url.trim() : String(url).trim()))
+      .filter((url) => url.length > 0);
+  }
+
+  return [];
+}
+
 export async function executeMerge(
   this: IExecuteFunctions,
   items: INodeExecutionData[],
@@ -16,10 +42,11 @@ export async function executeMerge(
 
   if (inputMethod === 'url') {
     // URL-based merge
-    const urls = this.getNodeParameter('fileUrls', 0) as string[];
+    const urlsParam = this.getNodeParameter('fileUrls', 0);
+    const urls = normalizeUrls(urlsParam);
 
     if (urls.length < 2) {
-      throw new Error('At least 2 URLs are required for merging');
+      throw new Error(`At least 2 URLs are required for merging. Received ${urls.length} URL(s).`);
     }
 
     const body = { urls };

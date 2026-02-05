@@ -5,6 +5,32 @@ import {
   prepareOutput,
 } from '../../shared/helpers';
 
+/**
+ * Normalize URL array from n8n's multipleValues parameter
+ * Handles various formats: string, array of strings, nested arrays
+ */
+function normalizeUrls(urlsParam: unknown): string[] {
+  if (!urlsParam) return [];
+
+  // If it's a string, split by comma or newline
+  if (typeof urlsParam === 'string') {
+    return urlsParam
+      .split(/[,\n]/)
+      .map((url) => url.trim())
+      .filter((url) => url.length > 0);
+  }
+
+  // If it's an array, flatten and filter
+  if (Array.isArray(urlsParam)) {
+    return urlsParam
+      .flat()
+      .map((url) => (typeof url === 'string' ? url.trim() : String(url).trim()))
+      .filter((url) => url.length > 0);
+  }
+
+  return [];
+}
+
 export async function executeImageToPdf(
   this: IExecuteFunctions,
   itemIndex: number,
@@ -20,9 +46,10 @@ export async function executeImageToPdf(
   let response: Buffer | object;
 
   if (inputMethod === 'url') {
-    const fileUrls = this.getNodeParameter('imageFileUrls', itemIndex) as string[];
+    const urlsParam = this.getNodeParameter('imageFileUrls', itemIndex);
+    const fileUrls = normalizeUrls(urlsParam);
 
-    if (!fileUrls || fileUrls.length === 0) {
+    if (fileUrls.length === 0) {
       throw new Error('At least one image URL is required');
     }
 

@@ -22,6 +22,17 @@ All notable changes to this project will be documented in this file.
 - Modified `morphoPdfApiRequest()` to conditionally set `format=binary` query parameter
 - All operations updated to pass `outputType` parameter through API request chain
 
+### Fixed
+- **Image to PDF URL Input**: Fixed bug where "File URL" field was shown instead of "Image URLs"
+  - Added `hide: { operation: ['imageToPdf'] }` to `fileUrlProperty` displayOptions
+  - Users now correctly see "Image URLs" field when using URL input method for Image to PDF
+- **Merge PDF URL Input**: Fixed same issue where both "File URL" and "File URLs" fields appeared
+  - Added `merge` to the hide list in `fileUrlProperty`
+- **URL Array Normalization**: Added `normalizeUrls()` function to both Merge and Image to PDF operations
+  - Handles n8n's various multipleValues formats: strings, arrays, nested arrays
+  - Supports comma-separated and newline-separated URLs
+  - Improved error messages to show URL count
+
 ## [1.1.6] - 2026-02-05
 
 

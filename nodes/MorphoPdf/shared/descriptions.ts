@@ -191,6 +191,7 @@ export const htmlBinaryPropertyNameProperty: INodeProperties = {
 
 /**
  * File URL (for URL input)
+ * Note: Excluded from imageToPdf and merge which use their own multi-URL properties
  */
 export const fileUrlProperty: INodeProperties = {
   displayName: 'File URL',
@@ -200,6 +201,9 @@ export const fileUrlProperty: INodeProperties = {
   displayOptions: {
     show: {
       inputMethod: ['url'],
+    },
+    hide: {
+      operation: ['imageToPdf', 'merge'],
     },
   },
   description: 'Public URL of the file to process',
@@ -224,8 +228,8 @@ export const fileUrlsProperty: INodeProperties = {
       inputMethod: ['url'],
     },
   },
-  description: 'Public URLs of PDF files to merge (minimum 2)',
-  placeholder: 'https://example.com/file1.pdf',
+  description: 'Public URLs of PDF files to merge. Add multiple URLs using the + button or separate with commas (minimum 2 required)',
+  placeholder: 'https://example.com/file1.pdf, https://example.com/file2.pdf',
 };
 
 /**
@@ -1424,8 +1428,8 @@ export const imageFileUrlsProperty: INodeProperties = {
       inputMethod: ['url'],
     },
   },
-  description: 'Public URLs of images to combine into PDF (at least 1 required)',
-  placeholder: 'https://example.com/image.jpg',
+  description: 'Public URLs of images to combine into PDF. Add multiple URLs using the + button or separate with commas (at least 1 required)',
+  placeholder: 'https://example.com/image1.jpg, https://example.com/image2.jpg',
 };
 
 /**
