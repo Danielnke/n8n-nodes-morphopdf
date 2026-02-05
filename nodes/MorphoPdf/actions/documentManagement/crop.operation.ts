@@ -2,7 +2,7 @@ import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
 import {
   morphoPdfApiRequest,
   getInputFile,
-  prepareBinaryOutput,
+  prepareOutput,
 } from '../../shared/helpers';
 
 export async function executeCrop(
@@ -10,16 +10,17 @@ export async function executeCrop(
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
+  const outputType = this.getNodeParameter('outputType', itemIndex, 'binary') as 'binary' | 'url';
 
   // Get crop parameters from UI
   // cropMode: 'all' applies first cropData entry to all pages
   // cropMode: 'single' applies each entry to its specified page (only those pages appear in output)
   const cropMode = this.getNodeParameter('cropMode', itemIndex, 'all') as string;
-  
+
   // cropData is now a JSON string defining region-based crop areas
   // Format: [{ pageNumber: 1, cropArea: { x, y, width, height, unit } }]
   const cropDataJson = this.getNodeParameter('cropData', itemIndex, '[]') as string;
-  
+
   // Parse and validate cropData
   let cropData: Array<{ pageNumber: number; cropArea: { x: number; y: number; width: number; height: number; unit?: string } }>;
   try {
@@ -44,7 +45,7 @@ export async function executeCrop(
     throw error;
   }
 
-  let responseBuffer: Buffer;
+  let response: Buffer | object;
 
   if (inputMethod === 'url') {
     const fileUrl = this.getNodeParameter('fileUrl', itemIndex) as string;
@@ -54,12 +55,15 @@ export async function executeCrop(
       cropData,
     };
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/pdf/crop',
       body,
-    )) as Buffer;
+      undefined,
+      undefined,
+      outputType,
+    );
   } else {
     const inputFile = await getInputFile.call(this, itemIndex);
 
@@ -76,20 +80,23 @@ export async function executeCrop(
       cropData: JSON.stringify(cropData),
     };
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/pdf/crop',
       undefined,
       formData,
-    )) as Buffer;
+      undefined,
+      outputType,
+    );
   }
 
-  return prepareBinaryOutput.call(
+  return prepareOutput.call(
     this,
     itemIndex,
-    responseBuffer,
+    response,
     'cropped.pdf',
     'application/pdf',
+    outputType,
   );
 }

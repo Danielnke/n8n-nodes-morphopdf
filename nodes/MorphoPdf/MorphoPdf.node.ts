@@ -16,6 +16,7 @@ import {
   binaryPropertyNameProperty,
   fileUrlProperty,
   fileUrlsProperty,
+  outputTypeProperty,
   outputBinaryPropertyNameProperty,
   splitModeProperty,
   rangesProperty,
@@ -81,6 +82,7 @@ import {
   // Image to PDF - extended options
   imageToPdfPageSizeProperty,
   imageToPdfMarginProperty,
+  imageFileUrlsProperty,
   backgroundColorProperty,
   imageOrderProperty,
   // Protect PDF - encryption level and permissions
@@ -254,10 +256,12 @@ export class MorphoPdf implements INodeType {
       // Image to PDF options
       imageToPdfPageSizeProperty,
       imageToPdfMarginProperty,
+      imageFileUrlsProperty,
       backgroundColorProperty,
       imageOrderProperty,
 
       // 5. Output Configuration (Last)
+      outputTypeProperty,
       outputBinaryPropertyNameProperty,
     ],
   };

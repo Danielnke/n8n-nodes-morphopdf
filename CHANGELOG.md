@@ -2,7 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-02-05
+
+### Added
+- **URL Output Support**: All 20 operations now support returning a temporary download URL instead of binary data
+  - New "Output Type" parameter allows choosing between "Binary Data" (default) and "URL"
+  - URL output returns a temporary download link valid for 1 hour
+  - Useful for workflows that need to pass URLs to other services
+- **Image to PDF Multi-URL Support**: Image to PDF action now accepts multiple image URLs
+  - New `imageFileUrls` parameter with `multipleValues: true`
+  - Allows batch conversion of multiple images in a single operation
+
+### Changed
+- **Background Color Visibility**: Background color option in Image to PDF now only appears when page size is A4, Letter, or Legal
+  - Hidden when page size is "Original" since background color doesn't apply
+
+### Technical
+- Added unified `prepareOutput()` helper function to handle both binary and URL responses
+- Modified `morphoPdfApiRequest()` to conditionally set `format=binary` query parameter
+- All operations updated to pass `outputType` parameter through API request chain
+
 ## [1.1.6] - 2026-02-05
+
 
 ### Fixed
 - **n8n Cloud Compatibility**: Removed `form-data` package dependency

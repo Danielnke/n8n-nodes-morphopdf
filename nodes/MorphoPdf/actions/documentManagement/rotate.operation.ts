@@ -2,7 +2,7 @@ import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
 import {
   morphoPdfApiRequest,
   getInputFile,
-  prepareBinaryOutput,
+  prepareOutput,
 } from '../../shared/helpers';
 
 export async function executeRotate(
@@ -10,6 +10,7 @@ export async function executeRotate(
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
+  const outputType = this.getNodeParameter('outputType', itemIndex, 'binary') as 'binary' | 'url';
   const angle = this.getNodeParameter('angle', itemIndex) as number;
   const pages = this.getNodeParameter('pages', itemIndex) as string;
   const rotationsJson = this.getNodeParameter('rotations', itemIndex, '') as string;
@@ -22,7 +23,7 @@ export async function executeRotate(
     }
   }
 
-  let responseBuffer: Buffer;
+  let response: Buffer | object;
 
   if (inputMethod === 'url') {
     const fileUrl = this.getNodeParameter('fileUrl', itemIndex) as string;
@@ -35,12 +36,15 @@ export async function executeRotate(
       body.pages = pages;
     }
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/pdf/rotate',
       body,
-    )) as Buffer;
+      undefined,
+      undefined,
+      outputType,
+    );
   } else {
     const inputFile = await getInputFile.call(this, itemIndex);
 
@@ -61,20 +65,23 @@ export async function executeRotate(
       formData.pages = pages;
     }
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/pdf/rotate',
       undefined,
       formData,
-    )) as Buffer;
+      undefined,
+      outputType,
+    );
   }
 
-  return prepareBinaryOutput.call(
+  return prepareOutput.call(
     this,
     itemIndex,
-    responseBuffer,
+    response,
     'rotated.pdf',
     'application/pdf',
+    outputType,
   );
 }

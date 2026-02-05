@@ -2,7 +2,7 @@ import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
 import {
   morphoPdfApiRequest,
   getInputFile,
-  prepareBinaryOutput,
+  prepareOutput,
 } from '../../shared/helpers';
 
 /**
@@ -24,6 +24,7 @@ export async function executeSign(
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
+  const outputType = this.getNodeParameter('outputType', itemIndex, 'binary') as 'binary' | 'url';
 
   // Get required signer name (used as fallback if image embedding fails)
   const signerName = this.getNodeParameter('signerName', itemIndex) as string;
@@ -33,9 +34,9 @@ export async function executeSign(
 
   // Get signature input type and data
   const signatureInputType = this.getNodeParameter('signatureInputType', itemIndex, 'url') as string;
-  
+
   let signatureData: string;
-  
+
   if (signatureInputType === 'base64') {
     // Direct base64 input
     signatureData = this.getNodeParameter('signatureData', itemIndex, '') as string;
@@ -53,7 +54,7 @@ export async function executeSign(
 
   // Get signature placements from JSON
   const signaturesJsonStr = this.getNodeParameter('signaturesJson', itemIndex, '[]') as string;
-  
+
   let signatures: Array<{ page: number; x: number; y: number; width: number; height: number }>;
   try {
     signatures = JSON.parse(signaturesJsonStr);
@@ -62,9 +63,9 @@ export async function executeSign(
     }
     // Validate structure
     for (const sig of signatures) {
-      if (typeof sig.page !== 'number' || typeof sig.x !== 'number' || 
-          typeof sig.y !== 'number' || typeof sig.width !== 'number' || 
-          typeof sig.height !== 'number') {
+      if (typeof sig.page !== 'number' || typeof sig.x !== 'number' ||
+        typeof sig.y !== 'number' || typeof sig.width !== 'number' ||
+        typeof sig.height !== 'number') {
         throw new Error('Each signature must have: page, x, y, width, height (all numbers)');
       }
     }
@@ -82,7 +83,7 @@ export async function executeSign(
     signatures,
   };
 
-  let responseBuffer: Buffer;
+  let response: Buffer | object;
 
   if (inputMethod === 'url') {
     const fileUrl = this.getNodeParameter('fileUrl', itemIndex) as string;
@@ -91,12 +92,15 @@ export async function executeSign(
       signature,
     };
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/pdf/sign',
       body,
-    )) as Buffer;
+      undefined,
+      undefined,
+      outputType,
+    );
   } else {
     const inputFile = await getInputFile.call(this, itemIndex);
 
@@ -112,20 +116,23 @@ export async function executeSign(
       signature: JSON.stringify(signature),
     };
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/pdf/sign',
       undefined,
       formData,
-    )) as Buffer;
+      undefined,
+      outputType,
+    );
   }
 
-  return prepareBinaryOutput.call(
+  return prepareOutput.call(
     this,
     itemIndex,
-    responseBuffer,
+    response,
     'signed.pdf',
     'application/pdf',
+    outputType,
   );
 }

@@ -2,7 +2,7 @@ import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
 import {
   morphoPdfApiRequest,
   getInputFile,
-  prepareBinaryOutput,
+  prepareOutput,
 } from '../../shared/helpers';
 
 export async function executeUnlock(
@@ -10,13 +10,14 @@ export async function executeUnlock(
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
+  const outputType = this.getNodeParameter('outputType', itemIndex, 'binary') as 'binary' | 'url';
   const password = this.getNodeParameter('password', itemIndex) as string;
 
   if (!password) {
     throw new Error('Password is required to unlock a PDF');
   }
 
-  let responseBuffer: Buffer;
+  let response: Buffer | object;
 
   if (inputMethod === 'url') {
     const fileUrl = this.getNodeParameter('fileUrl', itemIndex) as string;
@@ -25,12 +26,15 @@ export async function executeUnlock(
       password,
     };
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/pdf/unlock',
       body,
-    )) as Buffer;
+      undefined,
+      undefined,
+      outputType,
+    );
   } else {
     const inputFile = await getInputFile.call(this, itemIndex);
 
@@ -45,20 +49,23 @@ export async function executeUnlock(
       password,
     };
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/pdf/unlock',
       undefined,
       formData,
-    )) as Buffer;
+      undefined,
+      outputType,
+    );
   }
 
-  return prepareBinaryOutput.call(
+  return prepareOutput.call(
     this,
     itemIndex,
-    responseBuffer,
+    response,
     'unlocked.pdf',
     'application/pdf',
+    outputType,
   );
 }

@@ -2,7 +2,7 @@ import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
 import {
   morphoPdfApiRequest,
   getInputFile,
-  prepareBinaryOutput,
+  prepareOutput,
 } from '../../shared/helpers';
 
 export async function executePdfToWord(
@@ -10,20 +10,24 @@ export async function executePdfToWord(
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
+  const outputType = this.getNodeParameter('outputType', itemIndex, 'binary') as 'binary' | 'url';
   const ocrForScanned = this.getNodeParameter('ocrForScanned', itemIndex, false) as boolean;
 
-  let responseBuffer: Buffer;
+  let response: Buffer | object;
 
   if (inputMethod === 'url') {
     const fileUrl = this.getNodeParameter('fileUrl', itemIndex) as string;
     const body = { url: fileUrl, ocrForScanned };
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/convert/pdf-to-word',
       body,
-    )) as Buffer;
+      undefined,
+      undefined,
+      outputType,
+    );
   } else {
     const inputFile = await getInputFile.call(this, itemIndex);
 
@@ -38,20 +42,23 @@ export async function executePdfToWord(
       ocrForScanned: String(ocrForScanned),
     };
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/convert/pdf-to-word',
       undefined,
       formData,
-    )) as Buffer;
+      undefined,
+      outputType,
+    );
   }
 
-  return prepareBinaryOutput.call(
+  return prepareOutput.call(
     this,
     itemIndex,
-    responseBuffer,
+    response,
     'document.docx',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    outputType,
   );
 }

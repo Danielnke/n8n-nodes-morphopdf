@@ -1,33 +1,34 @@
 import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
-import { morphoPdfApiRequest, getInputFile, prepareBinaryOutput } from '../../shared/helpers';
+import { morphoPdfApiRequest, getInputFile, prepareOutput } from '../../shared/helpers';
 
 export async function executeHtmlToPdf(
   this: IExecuteFunctions,
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const htmlSourceType = this.getNodeParameter('htmlSourceType', itemIndex) as string;
-  
+  const outputType = this.getNodeParameter('outputType', itemIndex, 'binary') as 'binary' | 'url';
+
   // PDF options
   const pageFormat = this.getNodeParameter('pageFormat', itemIndex, 'A4') as string;
   const landscape = this.getNodeParameter('landscape', itemIndex, false) as boolean;
   const printBackground = this.getNodeParameter('printBackground', itemIndex, true) as boolean;
   const scale = this.getNodeParameter('scale', itemIndex, 1) as number;
-  
+
   // Margin options
   const marginTop = this.getNodeParameter('marginTop', itemIndex, '0mm') as string;
   const marginRight = this.getNodeParameter('marginRight', itemIndex, '0mm') as string;
   const marginBottom = this.getNodeParameter('marginBottom', itemIndex, '0mm') as string;
   const marginLeft = this.getNodeParameter('marginLeft', itemIndex, '0mm') as string;
-  
+
   // Navigation options
   const waitUntil = this.getNodeParameter('waitUntil', itemIndex, 'networkidle2') as string;
   const timeout = this.getNodeParameter('timeout', itemIndex, 55000) as number;
   const waitForSelector = this.getNodeParameter('waitForSelector', itemIndex, '') as string;
-  
+
   // Other options
   const forceBrowserRendering = this.getNodeParameter('forceBrowserRendering', itemIndex, false) as boolean;
 
-  let responseBuffer: Buffer;
+  let response: Buffer | object;
 
   // Build comprehensive options object matching API spec
   const options: Record<string, unknown> = {
@@ -63,12 +64,15 @@ export async function executeHtmlToPdf(
       options,
     };
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/convert/html-to-pdf',
       body,
-    )) as Buffer;
+      undefined,
+      undefined,
+      outputType,
+    );
   } else if (htmlSourceType === 'binary') {
     // Binary input - upload HTML file
     const inputFile = await getInputFile.call(this, itemIndex, 'binary');
@@ -84,13 +88,15 @@ export async function executeHtmlToPdf(
       options: JSON.stringify(options),
     };
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/convert/html-to-pdf',
       undefined,
       formData,
-    )) as Buffer;
+      undefined,
+      outputType,
+    );
   } else {
     // Raw HTML content
     const htmlContent = this.getNodeParameter('htmlContent', itemIndex) as string;
@@ -104,19 +110,23 @@ export async function executeHtmlToPdf(
       options,
     };
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/convert/html-to-pdf',
       body,
-    )) as Buffer;
+      undefined,
+      undefined,
+      outputType,
+    );
   }
 
-  return prepareBinaryOutput.call(
+  return prepareOutput.call(
     this,
     itemIndex,
-    responseBuffer,
+    response,
     'webpage.pdf',
     'application/pdf',
+    outputType,
   );
 }

@@ -2,7 +2,7 @@ import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
 import {
   morphoPdfApiRequest,
   getInputFile,
-  prepareBinaryOutput,
+  prepareOutput,
 } from '../../shared/helpers';
 
 export async function executeOrganize(
@@ -10,6 +10,7 @@ export async function executeOrganize(
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
+  const outputType = this.getNodeParameter('outputType', itemIndex, 'binary') as 'binary' | 'url';
 
   // Get new page order from UI parameter
   const newPageOrderInput = this.getNodeParameter('newPageOrder', itemIndex, '') as string;
@@ -23,7 +24,7 @@ export async function executeOrganize(
     ? rotatedPagesInput.split(',').map(p => parseInt(p.trim(), 10)).filter(n => !isNaN(n))
     : [];
 
-  let responseBuffer: Buffer;
+  let response: Buffer | object;
 
   if (inputMethod === 'url') {
     const fileUrl = this.getNodeParameter('fileUrl', itemIndex) as string;
@@ -37,12 +38,15 @@ export async function executeOrganize(
       body.rotatedPages = rotatedPages;
     }
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/pdf/organize',
       body,
-    )) as Buffer;
+      undefined,
+      undefined,
+      outputType,
+    );
   } else {
     const inputFile = await getInputFile.call(this, itemIndex);
 
@@ -62,20 +66,23 @@ export async function executeOrganize(
       formData.rotatedPages = JSON.stringify(rotatedPages);
     }
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/pdf/organize',
       undefined,
       formData,
-    )) as Buffer;
+      undefined,
+      outputType,
+    );
   }
 
-  return prepareBinaryOutput.call(
+  return prepareOutput.call(
     this,
     itemIndex,
-    responseBuffer,
+    response,
     'organized.pdf',
     'application/pdf',
+    outputType,
   );
 }

@@ -2,7 +2,7 @@ import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
 import {
   morphoPdfApiRequest,
   getMultipleInputFiles,
-  prepareBinaryOutput,
+  prepareOutput,
 } from '../../shared/helpers';
 
 export async function executeMerge(
@@ -10,8 +10,9 @@ export async function executeMerge(
   items: INodeExecutionData[],
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', 0) as string;
+  const outputType = this.getNodeParameter('outputType', 0, 'binary') as 'binary' | 'url';
 
-  let responseBuffer: Buffer;
+  let response: Buffer | object;
 
   if (inputMethod === 'url') {
     // URL-based merge
@@ -22,12 +23,15 @@ export async function executeMerge(
     }
 
     const body = { urls };
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/pdf/merge',
       body,
-    )) as Buffer;
+      undefined,
+      undefined,
+      outputType,
+    );
   } else {
     // Binary-based merge - collect all input files
     const files = await getMultipleInputFiles.call(this, items);
@@ -48,14 +52,16 @@ export async function executeMerge(
       };
     });
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/pdf/merge',
       undefined,
       formData,
-    )) as Buffer;
+      undefined,
+      outputType,
+    );
   }
 
-  return prepareBinaryOutput.call(this, 0, responseBuffer, 'merged.pdf', 'application/pdf');
+  return prepareOutput.call(this, 0, response, 'merged.pdf', 'application/pdf', outputType);
 }

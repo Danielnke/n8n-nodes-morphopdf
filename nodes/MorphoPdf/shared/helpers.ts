@@ -40,7 +40,7 @@ function buildMultipartBody(
       const header = `--${boundary}${CRLF}` +
         `Content-Disposition: form-data; name="${effectiveKey}"; filename="${filename}"${CRLF}` +
         `Content-Type: ${contentType}${CRLF}${CRLF}`;
-      
+
       parts.push(Buffer.from(header, 'utf-8'));
       parts.push(fileField.value);
       parts.push(Buffer.from(CRLF, 'utf-8'));
@@ -55,7 +55,7 @@ function buildMultipartBody(
           const header = `--${boundary}${CRLF}` +
             `Content-Disposition: form-data; name="${key}"; filename="${filename}"${CRLF}` +
             `Content-Type: ${contentType}${CRLF}${CRLF}`;
-          
+
           parts.push(Buffer.from(header, 'utf-8'));
           parts.push(fileField.value);
           parts.push(Buffer.from(CRLF, 'utf-8'));
@@ -81,6 +81,7 @@ function buildMultipartBody(
 
 /**
  * Make an authenticated request to the MorphoPDF API
+ * @param outputType - 'binary' returns raw file, 'url' returns JSON with downloadUrl
  */
 export async function morphoPdfApiRequest(
   this: IExecuteFunctions,
@@ -89,21 +90,29 @@ export async function morphoPdfApiRequest(
   body?: object,
   formData?: Record<string, unknown>,
   qs?: Record<string, string | number>,
+  outputType: 'binary' | 'url' = 'binary',
 ): Promise<Buffer | object> {
+  // Build query string based on output type
+  const queryString: Record<string, string | number> = { ...qs };
+  if (outputType === 'binary') {
+    queryString.format = 'binary';
+  }
+  // For 'url' mode, don't set format param - API returns JSON with downloadUrl
+
   const options: IHttpRequestOptions = {
     method,
     url: `${API_BASE_URL}${endpoint}`,
-    qs: { format: 'binary', ...qs },
+    qs: queryString,
     returnFullResponse: true,
-    encoding: 'arraybuffer',
-    json: false,
+    encoding: outputType === 'binary' ? 'arraybuffer' : undefined,
+    json: outputType === 'url',
   };
 
   if (formData) {
     // Build multipart form data manually (n8n Cloud doesn't allow form-data package)
     const boundary = generateBoundary();
     const multipartBody = buildMultipartBody(formData, boundary);
-    
+
     options.body = multipartBody;
     options.headers = {
       'Content-Type': `multipart/form-data; boundary=${boundary}`,
@@ -124,7 +133,19 @@ export async function morphoPdfApiRequest(
       options,
     );
 
-    // Check if response is binary or JSON
+    // For URL mode, return the JSON response directly
+    if (outputType === 'url') {
+      if (typeof response.body === 'string') {
+        try {
+          return JSON.parse(response.body);
+        } catch {
+          return { raw: response.body };
+        }
+      }
+      return response.body as object;
+    }
+
+    // For binary mode, check content type and return buffer
     const contentType = response.headers?.['content-type'] as string | undefined;
     if (
       contentType?.includes('application/pdf') ||
@@ -135,7 +156,7 @@ export async function morphoPdfApiRequest(
       return Buffer.from(response.body as ArrayBuffer);
     }
 
-    // Parse JSON response
+    // Parse JSON response (for error handling)
     if (typeof response.body === 'string') {
       try {
         return JSON.parse(response.body);
@@ -256,6 +277,49 @@ export async function prepareBinaryOutput(
     },
     pairedItem: { item: itemIndex },
   };
+}
+
+/**
+ * Unified output handler that supports both binary and URL output types
+ * @param response - Either a Buffer (binary) or API response object (URL mode)
+ * @param outputType - 'binary' or 'url'
+ */
+export async function prepareOutput(
+  this: IExecuteFunctions,
+  itemIndex: number,
+  response: Buffer | object,
+  fileName: string,
+  mimeType: string,
+  outputType: 'binary' | 'url' = 'binary',
+): Promise<INodeExecutionData> {
+  if (outputType === 'url') {
+    // URL mode - extract downloadUrl from API JSON response
+    const apiResponse = response as { success?: boolean; data?: { downloadUrl?: string; fileName?: string; outputSize?: number } };
+
+    if (!apiResponse.success || !apiResponse.data?.downloadUrl) {
+      throw new Error('API did not return a valid download URL');
+    }
+
+    const baseUrl = 'https://api.morphopdf.com';
+    const downloadUrl = apiResponse.data.downloadUrl.startsWith('http')
+      ? apiResponse.data.downloadUrl
+      : `${baseUrl}${apiResponse.data.downloadUrl}`;
+
+    return {
+      json: {
+        success: true,
+        outputType: 'url',
+        fileName: apiResponse.data.fileName || fileName,
+        fileSize: apiResponse.data.outputSize,
+        downloadUrl,
+        expiresIn: '1 hour',
+      },
+      pairedItem: { item: itemIndex },
+    };
+  }
+
+  // Binary mode - use existing binary output preparation
+  return prepareBinaryOutput.call(this, itemIndex, response as Buffer, fileName, mimeType);
 }
 
 /**

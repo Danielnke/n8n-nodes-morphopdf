@@ -2,7 +2,7 @@ import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
 import {
   morphoPdfApiRequest,
   getInputFile,
-  prepareBinaryOutput,
+  prepareOutput,
 } from '../../shared/helpers';
 
 export async function executePdfToImage(
@@ -10,12 +10,13 @@ export async function executePdfToImage(
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
+  const outputType = this.getNodeParameter('outputType', itemIndex, 'binary') as 'binary' | 'url';
   const format = this.getNodeParameter('imageFormat', itemIndex, 'png') as string;
   const dpi = this.getNodeParameter('dpi', itemIndex, 150) as number;
   const pageRange = this.getNodeParameter('pageRange', itemIndex, 'all') as string;
   const quality = this.getNodeParameter('jpegQuality', itemIndex, 85) as number;
 
-  let responseBuffer: Buffer;
+  let response: Buffer | object;
 
   if (inputMethod === 'url') {
     const fileUrl = this.getNodeParameter('fileUrl', itemIndex) as string;
@@ -24,12 +25,15 @@ export async function executePdfToImage(
       body.quality = quality;
     }
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/convert/pdf-to-image',
       body,
-    )) as Buffer;
+      undefined,
+      undefined,
+      outputType,
+    );
   } else {
     const inputFile = await getInputFile.call(this, itemIndex);
 
@@ -49,13 +53,15 @@ export async function executePdfToImage(
       formData.quality = String(quality);
     }
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/convert/pdf-to-image',
       undefined,
       formData,
-    )) as Buffer;
+      undefined,
+      outputType,
+    );
   }
 
   // Determine output type - single image or ZIP for multiple pages
@@ -65,11 +71,12 @@ export async function executePdfToImage(
     ? `image/${format === 'jpg' ? 'jpeg' : format}`
     : 'application/zip';
 
-  return prepareBinaryOutput.call(
+  return prepareOutput.call(
     this,
     itemIndex,
-    responseBuffer,
+    response,
     outputFileName,
     mimeType,
+    outputType,
   );
 }

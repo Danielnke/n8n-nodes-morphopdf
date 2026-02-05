@@ -229,6 +229,29 @@ export const fileUrlsProperty: INodeProperties = {
 };
 
 /**
+ * Output Type - Binary or URL
+ */
+export const outputTypeProperty: INodeProperties = {
+  displayName: 'Output Type',
+  name: 'outputType',
+  type: 'options',
+  options: [
+    {
+      name: 'Binary Data',
+      value: 'binary',
+      description: 'Return the file as binary data in the output',
+    },
+    {
+      name: 'URL',
+      value: 'url',
+      description: 'Return a temporary download URL (valid for 1 hour)',
+    },
+  ],
+  default: 'binary',
+  description: 'How to return the processed file',
+};
+
+/**
  * Output Binary Property Name
  */
 export const outputBinaryPropertyNameProperty: INodeProperties = {
@@ -236,6 +259,11 @@ export const outputBinaryPropertyNameProperty: INodeProperties = {
   name: 'outputBinaryPropertyName',
   type: 'string',
   default: 'data',
+  displayOptions: {
+    show: {
+      outputType: ['binary'],
+    },
+  },
   description: 'Name of the binary property to store the output file',
 };
 
@@ -1379,6 +1407,28 @@ export const imageToPdfMarginProperty: INodeProperties = {
 };
 
 /**
+ * Multiple Image URLs (for imageToPdf with URL input)
+ */
+export const imageFileUrlsProperty: INodeProperties = {
+  displayName: 'Image URLs',
+  name: 'imageFileUrls',
+  type: 'string',
+  typeOptions: {
+    multipleValues: true,
+  },
+  default: [],
+  displayOptions: {
+    show: {
+      resource: ['formatToPdf'],
+      operation: ['imageToPdf'],
+      inputMethod: ['url'],
+    },
+  },
+  description: 'Public URLs of images to combine into PDF (at least 1 required)',
+  placeholder: 'https://example.com/image.jpg',
+};
+
+/**
  * Background Color
  */
 export const backgroundColorProperty: INodeProperties = {
@@ -1389,11 +1439,12 @@ export const backgroundColorProperty: INodeProperties = {
     show: {
       resource: ['formatToPdf'],
       operation: ['imageToPdf'],
+      pageSize: ['A4', 'Letter', 'Legal'],
     },
   },
   default: '#FFFFFF',
   placeholder: '#FFFFFF',
-  description: 'Background color in hex format',
+  description: 'Background color in hex format (not applicable when page size is Original)',
 };
 
 /**

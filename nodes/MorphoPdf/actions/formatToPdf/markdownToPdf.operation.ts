@@ -2,7 +2,7 @@ import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
 import {
   morphoPdfApiRequest,
   getInputFile,
-  prepareBinaryOutput,
+  prepareOutput,
 } from '../../shared/helpers';
 
 export async function executeMarkdownToPdf(
@@ -10,6 +10,7 @@ export async function executeMarkdownToPdf(
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('markdownInputMethod', itemIndex) as string;
+  const outputType = this.getNodeParameter('outputType', itemIndex, 'binary') as 'binary' | 'url';
   const pageFormat = this.getNodeParameter('pageFormat', itemIndex, 'A4') as string;
   const landscape = this.getNodeParameter('landscape', itemIndex, false) as boolean;
 
@@ -20,7 +21,7 @@ export async function executeMarkdownToPdf(
     },
   };
 
-  let responseBuffer: Buffer;
+  let response: Buffer | object;
 
   if (inputMethod === 'text') {
     // Raw markdown text input - send as JSON body with markdown field
@@ -34,12 +35,15 @@ export async function executeMarkdownToPdf(
       options,
     };
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/convert/markdown-to-pdf',
       body,
-    )) as Buffer;
+      undefined,
+      undefined,
+      outputType,
+    );
   } else if (inputMethod === 'url') {
     // URL input - fetch markdown file from URL and send as JSON with URL field
     const markdownUrl = this.getNodeParameter('markdownUrl', itemIndex, '') as string;
@@ -66,12 +70,15 @@ export async function executeMarkdownToPdf(
       options,
     };
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/convert/markdown-to-pdf',
       body,
-    )) as Buffer;
+      undefined,
+      undefined,
+      outputType,
+    );
   } else {
     // Binary data input - send as multipart form
     const inputFile = await getInputFile.call(this, itemIndex, 'binary');
@@ -87,20 +94,23 @@ export async function executeMarkdownToPdf(
       options: JSON.stringify(options),
     };
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/convert/markdown-to-pdf',
       undefined,
       formData,
-    )) as Buffer;
+      undefined,
+      outputType,
+    );
   }
 
-  return prepareBinaryOutput.call(
+  return prepareOutput.call(
     this,
     itemIndex,
-    responseBuffer,
+    response,
     'document.pdf',
     'application/pdf',
+    outputType,
   );
 }

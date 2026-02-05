@@ -2,7 +2,7 @@ import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
 import {
   morphoPdfApiRequest,
   getInputFile,
-  prepareBinaryOutput,
+  prepareOutput,
 } from '../../shared/helpers';
 
 export async function executeProtect(
@@ -10,12 +10,13 @@ export async function executeProtect(
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
+  const outputType = this.getNodeParameter('outputType', itemIndex, 'binary') as 'binary' | 'url';
   const userPassword = this.getNodeParameter('userPassword', itemIndex) as string;
   const ownerPassword = this.getNodeParameter('ownerPassword', itemIndex, '') as string;
-  
+
   // Encryption level
   const encryptionLevel = this.getNodeParameter('encryptionLevel', itemIndex, '256') as string;
-  
+
   // Permissions - all default to true (allowed)
   const permissions = {
     modifying: this.getNodeParameter('permModifying', itemIndex, true) as boolean,
@@ -30,7 +31,7 @@ export async function executeProtect(
     throw new Error('User password is required to protect a PDF');
   }
 
-  let responseBuffer: Buffer;
+  let response: Buffer | object;
 
   if (inputMethod === 'url') {
     const fileUrl = this.getNodeParameter('fileUrl', itemIndex) as string;
@@ -44,12 +45,15 @@ export async function executeProtect(
       body.ownerPassword = ownerPassword;
     }
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/pdf/protect',
       body,
-    )) as Buffer;
+      undefined,
+      undefined,
+      outputType,
+    );
   } else {
     const inputFile = await getInputFile.call(this, itemIndex);
 
@@ -69,20 +73,23 @@ export async function executeProtect(
       formData.ownerPassword = ownerPassword;
     }
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/pdf/protect',
       undefined,
       formData,
-    )) as Buffer;
+      undefined,
+      outputType,
+    );
   }
 
-  return prepareBinaryOutput.call(
+  return prepareOutput.call(
     this,
     itemIndex,
-    responseBuffer,
+    response,
     'protected.pdf',
     'application/pdf',
+    outputType,
   );
 }

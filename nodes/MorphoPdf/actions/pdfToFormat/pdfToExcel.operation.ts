@@ -2,7 +2,7 @@ import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
 import {
   morphoPdfApiRequest,
   getInputFile,
-  prepareBinaryOutput,
+  prepareOutput,
 } from '../../shared/helpers';
 
 export async function executePdfToExcel(
@@ -10,9 +10,10 @@ export async function executePdfToExcel(
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
+  const outputType = this.getNodeParameter('outputType', itemIndex, 'binary') as 'binary' | 'url';
   const mode = this.getNodeParameter('excelMode', itemIndex, 'convert') as string;
   const regionsJson = this.getNodeParameter('excelRegions', itemIndex, '') as string;
-  let regions: Array<{x: number; y: number; width: number; height: number; page?: number}> | undefined;
+  let regions: Array<{ x: number; y: number; width: number; height: number; page?: number }> | undefined;
   if (regionsJson) {
     try {
       regions = JSON.parse(regionsJson);
@@ -21,7 +22,7 @@ export async function executePdfToExcel(
     }
   }
 
-  let responseBuffer: Buffer;
+  let response: Buffer | object;
 
   if (inputMethod === 'url') {
     const fileUrl = this.getNodeParameter('fileUrl', itemIndex) as string;
@@ -30,12 +31,15 @@ export async function executePdfToExcel(
       body.regions = regions;
     }
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/convert/pdf-to-excel',
       body,
-    )) as Buffer;
+      undefined,
+      undefined,
+      outputType,
+    );
   } else {
     const inputFile = await getInputFile.call(this, itemIndex);
 
@@ -53,20 +57,23 @@ export async function executePdfToExcel(
       formData.regions = JSON.stringify(regions);
     }
 
-    responseBuffer = (await morphoPdfApiRequest.call(
+    response = await morphoPdfApiRequest.call(
       this,
       'POST',
       '/convert/pdf-to-excel',
       undefined,
       formData,
-    )) as Buffer;
+      undefined,
+      outputType,
+    );
   }
 
-  return prepareBinaryOutput.call(
+  return prepareOutput.call(
     this,
     itemIndex,
-    responseBuffer,
+    response,
     'spreadsheet.xlsx',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    outputType,
   );
 }
