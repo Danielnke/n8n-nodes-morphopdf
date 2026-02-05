@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.5] - 2026-02-04
+
+### Fixed
+- **CRITICAL**: Fixed multipart form data handling in API requests
+  - Requests with file uploads (binary input mode) were failing with "invalid request" errors
+  - The issue was caused by improper serialization of multipart form data bodies
+  - Now uses `form-data` package to properly serialize multipart requests with correct boundaries
+  - All file-upload operations (Compress, Split, Rotate, Merge, Watermark, etc.) now work correctly
+- Fixed multi-file operations (Merge PDF, Image to PDF) to use correct field names for backend compatibility
+  - Numbered file fields (`file0`, `file1`, etc.) are now converted to `files` field as expected by backend
+
+### Added
+- Explicit dependency on `form-data` package (v4.0.0+)
+
 ## [1.1.0] - 2026-01-31
 
 ### Changed

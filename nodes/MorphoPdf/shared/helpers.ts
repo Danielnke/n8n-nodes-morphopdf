@@ -5,6 +5,7 @@ import type {
   INodeExecutionData,
   IBinaryData,
 } from 'n8n-workflow';
+import FormData from 'form-data';
 import type { InputFile } from './types';
 import { handleApiError } from './errors';
 
@@ -31,10 +32,35 @@ export async function morphoPdfApiRequest(
   };
 
   if (formData) {
-    options.body = formData;
-    options.headers = {
-      'Content-Type': 'multipart/form-data',
-    };
+    // Build proper multipart form data using form-data package
+    // This ensures the Content-Type header includes the boundary parameter
+    const form = new FormData();
+    for (const [key, fieldData] of Object.entries(formData)) {
+      if (typeof fieldData === 'object' && fieldData !== null && 'value' in fieldData) {
+        // Handle file fields with { value, options } format
+        const fileField = fieldData as { value: Buffer; options?: { filename?: string; contentType?: string } };
+        // Convert numbered file fields (file0, file1, etc.) to 'files' for backend compatibility
+        // The backend's parseRequest expects 'file' for single files and 'files' for multiple
+        const effectiveKey = /^file\d+$/.test(key) ? 'files' : key;
+        form.append(effectiveKey, fileField.value, fileField.options);
+      } else if (Array.isArray(fieldData)) {
+        // Handle arrays (e.g., multiple files passed as array)
+        for (const item of fieldData) {
+          if (typeof item === 'object' && item !== null && 'value' in item) {
+            const fileField = item as { value: Buffer; options?: { filename?: string; contentType?: string } };
+            form.append(key, fileField.value, fileField.options);
+          } else {
+            form.append(key, String(item));
+          }
+        }
+      } else {
+        // Handle regular string/number fields
+        form.append(key, String(fieldData));
+      }
+    }
+    options.body = form;
+    // Get headers with proper Content-Type including boundary
+    options.headers = form.getHeaders();
   } else if (body) {
     options.body = body;
     options.headers = {
