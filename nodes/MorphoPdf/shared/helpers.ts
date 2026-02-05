@@ -5,11 +5,79 @@ import type {
   INodeExecutionData,
   IBinaryData,
 } from 'n8n-workflow';
-import FormData from 'form-data';
 import type { InputFile } from './types';
 import { handleApiError } from './errors';
 
 const API_BASE_URL = 'https://api.morphopdf.com/v1';
+
+/**
+ * Generate a random boundary string for multipart form data
+ */
+function generateBoundary(): string {
+  return '----n8nFormBoundary' + Math.random().toString(36).substring(2);
+}
+
+/**
+ * Build a multipart form data body manually without external dependencies
+ * This is required for n8n Cloud compatibility (form-data package is not allowed)
+ */
+function buildMultipartBody(
+  formData: Record<string, unknown>,
+  boundary: string,
+): Buffer {
+  const parts: Buffer[] = [];
+  const CRLF = '\r\n';
+
+  for (const [key, fieldData] of Object.entries(formData)) {
+    if (typeof fieldData === 'object' && fieldData !== null && 'value' in fieldData) {
+      // Handle file fields with { value, options } format
+      const fileField = fieldData as { value: Buffer; options?: { filename?: string; contentType?: string } };
+      // Convert numbered file fields (file0, file1, etc.) to 'files' for backend compatibility
+      const effectiveKey = /^file\d+$/.test(key) ? 'files' : key;
+      const filename = fileField.options?.filename || 'file';
+      const contentType = fileField.options?.contentType || 'application/octet-stream';
+
+      const header = `--${boundary}${CRLF}` +
+        `Content-Disposition: form-data; name="${effectiveKey}"; filename="${filename}"${CRLF}` +
+        `Content-Type: ${contentType}${CRLF}${CRLF}`;
+      
+      parts.push(Buffer.from(header, 'utf-8'));
+      parts.push(fileField.value);
+      parts.push(Buffer.from(CRLF, 'utf-8'));
+    } else if (Array.isArray(fieldData)) {
+      // Handle arrays (e.g., multiple files passed as array)
+      for (const item of fieldData) {
+        if (typeof item === 'object' && item !== null && 'value' in item) {
+          const fileField = item as { value: Buffer; options?: { filename?: string; contentType?: string } };
+          const filename = fileField.options?.filename || 'file';
+          const contentType = fileField.options?.contentType || 'application/octet-stream';
+
+          const header = `--${boundary}${CRLF}` +
+            `Content-Disposition: form-data; name="${key}"; filename="${filename}"${CRLF}` +
+            `Content-Type: ${contentType}${CRLF}${CRLF}`;
+          
+          parts.push(Buffer.from(header, 'utf-8'));
+          parts.push(fileField.value);
+          parts.push(Buffer.from(CRLF, 'utf-8'));
+        } else {
+          const header = `--${boundary}${CRLF}` +
+            `Content-Disposition: form-data; name="${key}"${CRLF}${CRLF}`;
+          parts.push(Buffer.from(header + String(item) + CRLF, 'utf-8'));
+        }
+      }
+    } else {
+      // Handle regular string/number fields
+      const header = `--${boundary}${CRLF}` +
+        `Content-Disposition: form-data; name="${key}"${CRLF}${CRLF}`;
+      parts.push(Buffer.from(header + String(fieldData) + CRLF, 'utf-8'));
+    }
+  }
+
+  // Add closing boundary
+  parts.push(Buffer.from(`--${boundary}--${CRLF}`, 'utf-8'));
+
+  return Buffer.concat(parts);
+}
 
 /**
  * Make an authenticated request to the MorphoPDF API
@@ -32,35 +100,15 @@ export async function morphoPdfApiRequest(
   };
 
   if (formData) {
-    // Build proper multipart form data using form-data package
-    // This ensures the Content-Type header includes the boundary parameter
-    const form = new FormData();
-    for (const [key, fieldData] of Object.entries(formData)) {
-      if (typeof fieldData === 'object' && fieldData !== null && 'value' in fieldData) {
-        // Handle file fields with { value, options } format
-        const fileField = fieldData as { value: Buffer; options?: { filename?: string; contentType?: string } };
-        // Convert numbered file fields (file0, file1, etc.) to 'files' for backend compatibility
-        // The backend's parseRequest expects 'file' for single files and 'files' for multiple
-        const effectiveKey = /^file\d+$/.test(key) ? 'files' : key;
-        form.append(effectiveKey, fileField.value, fileField.options);
-      } else if (Array.isArray(fieldData)) {
-        // Handle arrays (e.g., multiple files passed as array)
-        for (const item of fieldData) {
-          if (typeof item === 'object' && item !== null && 'value' in item) {
-            const fileField = item as { value: Buffer; options?: { filename?: string; contentType?: string } };
-            form.append(key, fileField.value, fileField.options);
-          } else {
-            form.append(key, String(item));
-          }
-        }
-      } else {
-        // Handle regular string/number fields
-        form.append(key, String(fieldData));
-      }
-    }
-    options.body = form;
-    // Get headers with proper Content-Type including boundary
-    options.headers = form.getHeaders();
+    // Build multipart form data manually (n8n Cloud doesn't allow form-data package)
+    const boundary = generateBoundary();
+    const multipartBody = buildMultipartBody(formData, boundary);
+    
+    options.body = multipartBody;
+    options.headers = {
+      'Content-Type': `multipart/form-data; boundary=${boundary}`,
+      'Content-Length': String(multipartBody.length),
+    };
   } else if (body) {
     options.body = body;
     options.headers = {
