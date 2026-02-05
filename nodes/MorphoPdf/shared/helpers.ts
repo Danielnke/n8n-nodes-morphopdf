@@ -294,23 +294,30 @@ export async function prepareOutput(
 ): Promise<INodeExecutionData> {
   if (outputType === 'url') {
     // URL mode - extract downloadUrl from API JSON response
-    const apiResponse = response as { success?: boolean; data?: { downloadUrl?: string; fileName?: string; outputSize?: number } };
+    // API returns flat structure: { success, downloadUrl, fileName, ... }
+    const apiResponse = response as {
+      success?: boolean;
+      downloadUrl?: string;
+      fileName?: string;
+      outputSize?: number;
+      message?: string;
+    };
 
-    if (!apiResponse.success || !apiResponse.data?.downloadUrl) {
+    if (!apiResponse.success || !apiResponse.downloadUrl) {
       throw new Error('API did not return a valid download URL');
     }
 
     const baseUrl = 'https://api.morphopdf.com';
-    const downloadUrl = apiResponse.data.downloadUrl.startsWith('http')
-      ? apiResponse.data.downloadUrl
-      : `${baseUrl}${apiResponse.data.downloadUrl}`;
+    const downloadUrl = apiResponse.downloadUrl.startsWith('http')
+      ? apiResponse.downloadUrl
+      : `${baseUrl}${apiResponse.downloadUrl}`;
 
     return {
       json: {
         success: true,
         outputType: 'url',
-        fileName: apiResponse.data.fileName || fileName,
-        fileSize: apiResponse.data.outputSize,
+        fileName: apiResponse.fileName || fileName,
+        fileSize: apiResponse.outputSize,
         downloadUrl,
         expiresIn: '1 hour',
       },
