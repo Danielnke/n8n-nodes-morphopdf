@@ -30,15 +30,76 @@ export function handleApiError(error: unknown): never {
     throw error;
   }
 
-  const err = error as { response?: { body?: { error?: { code?: string; message?: string } } }; message?: string };
-  const errorBody = err.response?.body;
+  // n8n's httpRequest can put error data in various locations depending on the error type
+  // Try to extract the API's structured error response: { error: { code, message, hint } }
+  const err = error as {
+    response?: {
+      body?: unknown;
+      data?: unknown;
+    };
+    body?: unknown;
+    message?: string;
+    cause?: { message?: string };
+  };
 
-  if (errorBody?.error?.code) {
-    const knownError = MORPHOPDF_ERROR_CODES[errorBody.error.code];
-    if (knownError) {
-      throw new MorphoPdfError(errorBody.error.code, errorBody.error.message);
+  // Try multiple locations where n8n might put the response body
+  const possibleBodies = [
+    err.response?.body,
+    err.response?.data,
+    err.body,
+  ];
+
+  for (const body of possibleBodies) {
+    if (body && typeof body === 'object') {
+      const parsed = body as {
+        success?: boolean;
+        error?: {
+          code?: string;
+          message?: string;
+          hint?: string;
+        };
+      };
+
+      // Check for API's structured error format
+      if (parsed.error?.code || parsed.error?.message) {
+        const code = parsed.error.code || 'UNKNOWN_ERROR';
+        const message = parsed.error.message || 'Unknown error occurred';
+        const hint = parsed.error.hint;
+
+        // Build a helpful error message including the hint if available
+        const fullMessage = hint
+          ? `${message}. Hint: ${hint}`
+          : message;
+
+        // Check if it's a known error code
+        if (MORPHOPDF_ERROR_CODES[code]) {
+          throw new MorphoPdfError(code, fullMessage);
+        }
+
+        // Unknown error code but still has structured error
+        throw new Error(`MorphoPDF API Error: ${fullMessage}`);
+      }
+    }
+
+    // Try parsing string body as JSON
+    if (body && typeof body === 'string') {
+      try {
+        const parsed = JSON.parse(body);
+        if (parsed.error?.message) {
+          const hint = parsed.error.hint;
+          const fullMessage = hint
+            ? `${parsed.error.message}. Hint: ${hint}`
+            : parsed.error.message;
+          throw new Error(`MorphoPDF API Error: ${fullMessage}`);
+        }
+      } catch {
+        // Not valid JSON, continue to next
+      }
     }
   }
 
-  throw new Error(`MorphoPDF API Error: ${err.message || 'Unknown error'}`);
+  // Fall back to the error message itself
+  const fallbackMessage = err.message || err.cause?.message || 'Unknown error';
+  throw new Error(`MorphoPDF API Error: ${fallbackMessage}`);
 }
+
