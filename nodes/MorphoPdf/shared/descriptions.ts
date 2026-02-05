@@ -228,7 +228,7 @@ export const fileUrlsProperty: INodeProperties = {
       inputMethod: ['url'],
     },
   },
-  description: 'Public URLs of PDF files to merge. Add multiple URLs using the + button or separate with commas (minimum 2 required)',
+  description: 'Public URLs of PDF files to merge. Add multiple URLs using the + button or separate with commas (minimum 2 required).',
   placeholder: 'https://example.com/file1.pdf, https://example.com/file2.pdf',
 };
 
@@ -1428,7 +1428,7 @@ export const imageFileUrlsProperty: INodeProperties = {
       inputMethod: ['url'],
     },
   },
-  description: 'Public URLs of images to combine into PDF. Add multiple URLs using the + button or separate with commas (at least 1 required)',
+  description: 'Public URLs of images to combine into PDF. Add multiple URLs using the + button or separate with commas (at least 1 required).',
   placeholder: 'https://example.com/image1.jpg, https://example.com/image2.jpg',
 };
 
