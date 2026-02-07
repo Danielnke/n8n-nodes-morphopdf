@@ -44,7 +44,8 @@
       "dist/credentials/MorphoPdfApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/MorphoPdf/MorphoPdf.node.js"
+      "dist/nodes/MorphoPdf/MorphoPdf.node.js",
+      "dist/nodes/MorphoPdf/MorphoPdfTool.node.js"
     ]
   },
   "dependencies": {
