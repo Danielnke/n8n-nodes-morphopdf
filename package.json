@@ -44,13 +44,8 @@
       "dist/credentials/MorphoPdfApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/MorphoPdf/MorphoPdf.node.js",
-      "dist/nodes/MorphoPdf/MorphoPdfTool.node.js"
+      "dist/nodes/MorphoPdf/MorphoPdf.node.js"
     ]
-  },
-  "dependencies": {
-    "@langchain/core": "^0.3.0",
-    "zod": "^3.23.0"
   },
   "devDependencies": {
     "@n8n/node-cli": "*",
