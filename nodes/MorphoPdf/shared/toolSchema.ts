@@ -19,9 +19,14 @@ export const morphoPdfToolSchema = z
         'watermark',
         'pdfToWord',
         'pdfToExcel',
+        'pdfToPowerpoint',
         'pdfToImage',
         'wordToPdf',
+        'excelToPdf',
+        'powerpointToPdf',
+        'imageToPdf',
         'htmlToPdf',
+        'markdownToPdf',
       ])
       .describe(
         'The PDF operation to perform. ' +
@@ -32,9 +37,14 @@ export const morphoPdfToolSchema = z
           'watermark=add text overlay, ' +
           'pdfToWord=convert PDF to DOCX, ' +
           'pdfToExcel=extract tables to XLSX, ' +
+          'pdfToPowerpoint=convert PDF to PPTX, ' +
           'pdfToImage=convert pages to PNG/JPG, ' +
           'wordToPdf=convert DOCX to PDF, ' +
-          'htmlToPdf=render HTML/URL to PDF',
+          'excelToPdf=convert XLSX to PDF, ' +
+          'powerpointToPdf=convert PPTX to PDF, ' +
+          'imageToPdf=combine images into PDF, ' +
+          'htmlToPdf=render HTML/URL to PDF, ' +
+          'markdownToPdf=convert Markdown to PDF',
       ),
 
     inputUrl: z
@@ -42,12 +52,16 @@ export const morphoPdfToolSchema = z
       .url()
       .optional()
       .describe(
-        'Public URL of the input file. Required for all operations EXCEPT htmlToPdf when using htmlContent. ' +
+        'Public URL of the input file. Required for all operations EXCEPT htmlToPdf (when using htmlContent) and markdownToPdf (when using markdownContent). ' +
           'For compress/split/rotate/watermark: must be a PDF URL. ' +
           'For merge: the first PDF to merge (additional URLs go in additionalUrls). ' +
-          'For pdfToWord/pdfToExcel/pdfToImage: must be a PDF URL. ' +
+          'For pdfToWord/pdfToExcel/pdfToPowerpoint/pdfToImage: must be a PDF URL. ' +
           'For wordToPdf: must be a DOCX URL. ' +
-          'For htmlToPdf: must be a webpage URL (or omit if using htmlContent).',
+          'For excelToPdf: must be an XLSX URL. ' +
+          'For powerpointToPdf: must be a PPTX URL. ' +
+          'For imageToPdf: must be an image URL (additional images go in additionalUrls). ' +
+          'For htmlToPdf: must be a webpage URL (or omit if using htmlContent). ' +
+          'For markdownToPdf: must be a Markdown file URL (or omit if using markdownContent).',
       ),
 
     // === COMPRESS OPERATION ===
@@ -67,9 +81,10 @@ export const morphoPdfToolSchema = z
       .array(z.string().url())
       .optional()
       .describe(
-        'FOR MERGE ONLY. Array of additional PDF URLs to combine with inputUrl. ' +
-          'Minimum 1 URL required. PDFs are merged in order: inputUrl first, then these URLs. ' +
-          'Example: ["https://example.com/doc2.pdf", "https://example.com/doc3.pdf"]',
+        'FOR MERGE AND IMAGE_TO_PDF. Array of additional file URLs to combine with inputUrl. ' +
+          'For merge: additional PDF URLs. Minimum 1 URL required. PDFs are merged in order: inputUrl first, then these URLs. ' +
+          'For imageToPdf: additional image URLs. Images are combined in order: inputUrl first, then these URLs. ' +
+          'Example: ["https://example.com/file2.pdf", "https://example.com/file3.pdf"]',
       ),
 
     // === SPLIT OPERATION ===
@@ -169,11 +184,22 @@ export const morphoPdfToolSchema = z
           'Example: "<html><body><h1>Hello World</h1></body></html>". ' +
           'Either inputUrl OR htmlContent is required for htmlToPdf.',
       ),
+
+    // === MARKDOWN TO PDF OPERATION ===
+    markdownContent: z
+      .string()
+      .optional()
+      .describe(
+        'FOR MARKDOWN_TO_PDF ONLY. Raw Markdown content to convert to PDF. ' +
+          'Use this instead of inputUrl when you have Markdown as a string. ' +
+          'Either inputUrl OR markdownContent is required for markdownToPdf.',
+      ),
   })
   .describe(
-    'MorphoPDF AI Tool - Process PDF files with various operations. ' +
-      'Supports compression, merging, splitting, rotation, watermarking, ' +
-      'and format conversions (PDF to Word/Excel/Image, Word/HTML to PDF).',
+    'MorphoPDF AI Tool - Process PDF files with 15 operations. ' +
+      'PDF operations: compress, merge, split, rotate, watermark. ' +
+      'PDF to other formats: pdfToWord (DOCX), pdfToExcel (XLSX), pdfToPowerpoint (PPTX), pdfToImage (PNG/JPG). ' +
+      'Other formats to PDF: wordToPdf, excelToPdf, powerpointToPdf, imageToPdf, htmlToPdf, markdownToPdf.',
   );
 
 /**
@@ -193,9 +219,14 @@ export const operationEndpoints: Record<string, string> = {
   watermark: '/pdf/watermark',
   pdfToWord: '/convert/pdf-to-word',
   pdfToExcel: '/convert/pdf-to-excel',
+  pdfToPowerpoint: '/convert/pdf-to-powerpoint',
   pdfToImage: '/convert/pdf-to-image',
   wordToPdf: '/convert/word-to-pdf',
+  excelToPdf: '/convert/excel-to-pdf',
+  powerpointToPdf: '/convert/powerpoint-to-pdf',
+  imageToPdf: '/convert/image-to-pdf',
   htmlToPdf: '/convert/html-to-pdf',
+  markdownToPdf: '/convert/markdown-to-pdf',
 };
 
 /**
@@ -209,9 +240,14 @@ const operationNames: Record<string, string> = {
   watermark: 'PDF Watermarking',
   pdfToWord: 'PDF to Word Conversion',
   pdfToExcel: 'PDF to Excel Conversion',
+  pdfToPowerpoint: 'PDF to PowerPoint Conversion',
   pdfToImage: 'PDF to Image Conversion',
   wordToPdf: 'Word to PDF Conversion',
+  excelToPdf: 'Excel to PDF Conversion',
+  powerpointToPdf: 'PowerPoint to PDF Conversion',
+  imageToPdf: 'Image to PDF Conversion',
   htmlToPdf: 'HTML to PDF Conversion',
+  markdownToPdf: 'Markdown to PDF Conversion',
 };
 
 /**
