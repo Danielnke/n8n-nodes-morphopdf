@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-morphopdf",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "n8n community node for MorphoPDF - Professional PDF processing and conversion",
   "keywords": [
     "n8n-community-node-package",
