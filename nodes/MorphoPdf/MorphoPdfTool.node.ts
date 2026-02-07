@@ -1,3 +1,4 @@
+// eslint-disable-next-line @n8n/community-nodes/no-restricted-imports
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import type {
   INodeType,
@@ -6,7 +7,7 @@ import type {
   SupplyData,
   IDataObject,
 } from 'n8n-workflow';
-import { NodeConnectionTypes } from 'n8n-workflow';
+import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 import {
   morphoPdfToolSchema,
   operationEndpoints,
@@ -114,6 +115,7 @@ export class MorphoPdfTool implements INodeType {
     defaults: {
       name: 'MorphoPDF Tool',
     },
+    usableAsTool: true,
     codex: {
       categories: ['AI'],
       subcategories: {
@@ -146,11 +148,13 @@ export class MorphoPdfTool implements INodeType {
     ],
   };
 
-  async supplyData(this: ISupplyDataFunctions, itemIndex: number): Promise<SupplyData> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async supplyData(this: ISupplyDataFunctions, _itemIndex: number): Promise<SupplyData> {
     const credentials = await this.getCredentials('morphoPdfApi');
     const apiKey = credentials.apiKey as string;
 
     // Get reference to context for use in tool function
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const context = this;
 
     const tool = new DynamicStructuredTool({
@@ -170,12 +174,18 @@ export class MorphoPdfTool implements INodeType {
         try {
           // Validate required inputUrl for operations that need it
           if (input.operation !== 'htmlToPdf' && !input.inputUrl) {
-            throw new Error(`inputUrl is required for ${input.operation} operation`);
+            throw new NodeOperationError(
+              context.getNode(),
+              `inputUrl is required for ${input.operation} operation`,
+            );
           }
 
           // For htmlToPdf, require either inputUrl or htmlContent
           if (input.operation === 'htmlToPdf' && !input.inputUrl && !input.htmlContent) {
-            throw new Error('htmlToPdf requires either inputUrl or htmlContent');
+            throw new NodeOperationError(
+              context.getNode(),
+              'htmlToPdf requires either inputUrl or htmlContent',
+            );
           }
 
           // For merge, require at least one additional URL
@@ -183,12 +193,18 @@ export class MorphoPdfTool implements INodeType {
             input.operation === 'merge' &&
             (!input.additionalUrls || input.additionalUrls.length === 0)
           ) {
-            throw new Error('merge operation requires at least one URL in additionalUrls');
+            throw new NodeOperationError(
+              context.getNode(),
+              'merge operation requires at least one URL in additionalUrls',
+            );
           }
 
           // For watermark, require watermarkText
           if (input.operation === 'watermark' && !input.watermarkText) {
-            throw new Error('watermark operation requires watermarkText');
+            throw new NodeOperationError(
+              context.getNode(),
+              'watermark operation requires watermarkText',
+            );
           }
 
           // Build API request
