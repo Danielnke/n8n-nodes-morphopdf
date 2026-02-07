@@ -47,6 +47,10 @@
       "dist/nodes/MorphoPdf/MorphoPdf.node.js"
     ]
   },
+  "dependencies": {
+    "@langchain/core": "^0.3.0",
+    "zod": "^3.23.0"
+  },
   "devDependencies": {
     "@n8n/node-cli": "*",
     "@types/node": "^25.1.0",
