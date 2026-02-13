@@ -7,6 +7,8 @@ import type {
   SupplyData,
 } from 'n8n-workflow';
 import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
+import { DynamicStructuredTool } from '@langchain/core/tools';
+import { z } from 'zod';
 
 import {
   resourceProperty,
@@ -269,18 +271,11 @@ export class MorphoPdf implements INodeType {
   };
 
   async supplyData(this: ISupplyDataFunctions, itemIndex: number): Promise<SupplyData> {
-    // Dynamic requires — these exist in n8n's runtime but are NOT in our package.json
-    const { DynamicStructuredTool } = require('@langchain/core/tools') as {
-      DynamicStructuredTool: any;
-    };
-    const { z } = require('zod') as { z: any };
-
-    const ctx = this;
-    const resource = ctx.getNodeParameter('resource', itemIndex) as string;
-    const operation = ctx.getNodeParameter('operation', itemIndex) as string;
+    const resource = this.getNodeParameter('resource', itemIndex) as string;
+    const operation = this.getNodeParameter('operation', itemIndex) as string;
 
     // Sanitize node name for LangChain tool name (alphanumeric + underscores only)
-    const rawName = ctx.getNode().name || 'MorphoPDF';
+    const rawName = this.getNode().name || 'MorphoPDF';
     const toolName = rawName.replace(/[^a-zA-Z0-9_]+/g, '_').replace(/^_|_$/g, '') || 'MorphoPDF';
 
     // Human-readable operation descriptions
@@ -354,13 +349,13 @@ export class MorphoPdf implements INodeType {
     const endpoint = endpointMap[resource]?.[operation];
     if (!endpoint) {
       throw new NodeOperationError(
-        ctx.getNode(),
+        this.getNode(),
         `No endpoint found for ${resource}/${operation}`,
       );
     }
 
     // Build Zod schema based on the operation
-    let schema: any;
+    let schema: z.ZodType<Record<string, unknown>>;
     if (operation === 'merge') {
       schema = z.object({
         fileUrls: z
@@ -406,7 +401,7 @@ export class MorphoPdf implements INodeType {
       description,
       schema,
       func: async (args: Record<string, string>) => {
-        const { index } = ctx.addInputData(NodeConnectionTypes.AiTool, [[{ json: args }]]);
+        this.addInputData(NodeConnectionTypes.AiTool, [[{ json: args }]]);
 
         try {
           // Build request body based on operation
@@ -425,7 +420,7 @@ export class MorphoPdf implements INodeType {
               body = { url: args.url };
             } else {
               const response = 'Error: Please provide either a URL or HTML content';
-              ctx.addOutputData(NodeConnectionTypes.AiTool, itemIndex, [[{ json: { response } }]]);
+              this.addOutputData(NodeConnectionTypes.AiTool, itemIndex, [[{ json: { response } }]]);
               return response;
             }
           } else if (operation === 'markdownToPdf') {
@@ -435,7 +430,7 @@ export class MorphoPdf implements INodeType {
               body = { url: args.markdownUrl };
             } else {
               const response = 'Error: Please provide either markdown content or a markdown URL';
-              ctx.addOutputData(NodeConnectionTypes.AiTool, itemIndex, [[{ json: { response } }]]);
+              this.addOutputData(NodeConnectionTypes.AiTool, itemIndex, [[{ json: { response } }]]);
               return response;
             }
           } else {
@@ -450,8 +445,8 @@ export class MorphoPdf implements INodeType {
             json: true,
           };
 
-          const result = (await ctx.helpers.httpRequestWithAuthentication.call(
-            ctx,
+          const result = (await this.helpers.httpRequestWithAuthentication.call(
+            this,
             'morphoPdfApi',
             requestOptions,
           )) as {
@@ -471,11 +466,11 @@ export class MorphoPdf implements INodeType {
             ? `Successfully completed "${description}". Download URL: ${downloadUrl} (expires in 1 hour). File: ${result.fileName || 'output'}, Size: ${result.outputSize || 'unknown'} bytes.`
             : `Error: ${result.message || 'Operation failed'}`;
 
-          ctx.addOutputData(NodeConnectionTypes.AiTool, itemIndex, [[{ json: { response } }]]);
+          this.addOutputData(NodeConnectionTypes.AiTool, itemIndex, [[{ json: { response } }]]);
           return response;
         } catch (error) {
           const errMsg = `Error: ${(error as Error).message}`;
-          ctx.addOutputData(NodeConnectionTypes.AiTool, itemIndex, [[{ json: { response: errMsg } }]]);
+          this.addOutputData(NodeConnectionTypes.AiTool, itemIndex, [[{ json: { response: errMsg } }]]);
           return errMsg;
         }
       },
