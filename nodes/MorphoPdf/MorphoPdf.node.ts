@@ -148,7 +148,7 @@ export class MorphoPdf implements INodeType {
     },
     inputs: [NodeConnectionTypes.Main],
     outputs: [NodeConnectionTypes.Main],
-    usableAsTool: true,
+    // Note: usableAsTool removed - supplyData() handles AI tool integration
     credentials: [
       {
         name: 'morphoPdfApi',
