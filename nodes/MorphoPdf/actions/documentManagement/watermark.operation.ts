@@ -9,11 +9,11 @@ export async function executeWatermark(
   this: IExecuteFunctions,
   itemIndex: number,
 ): Promise<INodeExecutionData> {
-  const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
+  const inputMethod = this.getNodeParameter('inputMethod', itemIndex, 'url') as string;
   const outputType = this.getNodeParameter('outputType', itemIndex, 'url') as 'binary' | 'url';
-  const watermarkType = this.getNodeParameter('watermarkType', itemIndex) as string;
-  const position = this.getNodeParameter('watermarkPosition', itemIndex) as string;
-  const opacity = this.getNodeParameter('watermarkOpacity', itemIndex) as number;
+  const watermarkType = this.getNodeParameter('watermarkType', itemIndex, 'text') as string;
+  const position = this.getNodeParameter('watermarkPosition', itemIndex, 'center') as string;
+  const opacity = this.getNodeParameter('watermarkOpacity', itemIndex, 0.3) as number;
 
   // Pages to watermark (all, 1,3,5, or 1-5)
   const pages = this.getNodeParameter('watermarkPages', itemIndex, 'all') as string;
@@ -25,12 +25,12 @@ export async function executeWatermark(
   };
 
   if (watermarkType === 'text') {
-    watermarkOptions.text = this.getNodeParameter('watermarkText', itemIndex) as string;
-    watermarkOptions.rotation = this.getNodeParameter('watermarkRotation', itemIndex) as number;
+    watermarkOptions.text = this.getNodeParameter('watermarkText', itemIndex, 'CONFIDENTIAL') as string;
+    watermarkOptions.rotation = this.getNodeParameter('watermarkRotation', itemIndex, -45) as number;
     watermarkOptions.fontSize = this.getNodeParameter('watermarkFontSize', itemIndex, 48) as number;
     watermarkOptions.color = this.getNodeParameter('watermarkColor', itemIndex, '#000000') as string;
   } else {
-    watermarkOptions.imageUrl = this.getNodeParameter('watermarkImageUrl', itemIndex) as string;
+    watermarkOptions.imageUrl = this.getNodeParameter('watermarkImageUrl', itemIndex, '') as string;
 
     // Width and height are optional for image watermarks
     const width = this.getNodeParameter('watermarkWidth', itemIndex, '') as string;

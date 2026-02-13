@@ -9,10 +9,10 @@ export async function executeRotate(
   this: IExecuteFunctions,
   itemIndex: number,
 ): Promise<INodeExecutionData> {
-  const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
+  const inputMethod = this.getNodeParameter('inputMethod', itemIndex, 'url') as string;
   const outputType = this.getNodeParameter('outputType', itemIndex, 'url') as 'binary' | 'url';
-  const angle = this.getNodeParameter('angle', itemIndex) as number;
-  const pages = this.getNodeParameter('pages', itemIndex) as string;
+  const angle = this.getNodeParameter('angle', itemIndex, 90) as number;
+  const pages = this.getNodeParameter('pages', itemIndex, 'all') as string;
   const rotationsJson = this.getNodeParameter('rotations', itemIndex, '') as string;
   let rotations: Record<string, number> | undefined;
   if (rotationsJson) {

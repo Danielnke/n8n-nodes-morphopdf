@@ -9,7 +9,7 @@ export async function executeProtect(
   this: IExecuteFunctions,
   itemIndex: number,
 ): Promise<INodeExecutionData> {
-  const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
+  const inputMethod = this.getNodeParameter('inputMethod', itemIndex, 'url') as string;
   const outputType = this.getNodeParameter('outputType', itemIndex, 'url') as 'binary' | 'url';
   const userPassword = this.getNodeParameter('userPassword', itemIndex) as string;
   const ownerPassword = this.getNodeParameter('ownerPassword', itemIndex, '') as string;

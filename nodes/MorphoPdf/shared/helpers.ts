@@ -180,13 +180,13 @@ export async function getInputFile(
   forcedInputMethod?: string,
 ): Promise<InputFile> {
   // If forcedInputMethod is provided (e.g. for HTML/Markdown), use it
-  // Otherwise try to get 'inputMethod' parameter, defaulting to 'binary' if not found
+  // Otherwise try to get 'inputMethod' parameter, defaulting to 'url' if not found
   let inputMethod = forcedInputMethod;
   if (!inputMethod) {
     try {
       inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
     } catch {
-      inputMethod = 'binary';
+      inputMethod = 'url';
     }
   }
 

@@ -267,148 +267,160 @@ export class MorphoPdf implements INodeType {
   };
 
   async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-    const items = this.getInputData();
-    const returnData: INodeExecutionData[] = [];
+    try {
+      const items = this.getInputData();
+      const returnData: INodeExecutionData[] = [];
 
-    const resource = this.getNodeParameter('resource', 0) as string;
-    const operation = this.getNodeParameter('operation', 0) as string;
+      const resource = this.getNodeParameter('resource', 0) as string;
+      const operation = this.getNodeParameter('operation', 0) as string;
 
-    // For merge operation, process all items at once
-    if (resource === 'documentManagement' && operation === 'merge') {
-      try {
-        const result = await executeMerge.call(this, items);
-        returnData.push(result);
-      } catch (error) {
-        if (this.continueOnFail()) {
-          returnData.push({
-            json: { error: (error as Error).message },
-            pairedItem: { item: 0 },
-          });
-        } else {
-          throw error;
+      // For merge operation, process all items at once
+      if (resource === 'documentManagement' && operation === 'merge') {
+        try {
+          const result = await executeMerge.call(this, items);
+          returnData.push(result);
+        } catch (error) {
+          if (this.continueOnFail()) {
+            returnData.push({
+              json: { error: (error as Error).message },
+              pairedItem: { item: 0 },
+            });
+          } else {
+            throw error;
+          }
+        }
+        return [returnData];
+      }
+
+      // For other operations, process each item individually
+      for (let i = 0; i < items.length; i++) {
+        try {
+          let result: INodeExecutionData;
+
+          // Document Management operations
+          if (resource === 'documentManagement') {
+            switch (operation) {
+              case 'split':
+                result = await executeSplit.call(this, i);
+                break;
+              case 'compress':
+                result = await executeCompress.call(this, i);
+                break;
+              case 'rotate':
+                result = await executeRotate.call(this, i);
+                break;
+              case 'crop':
+                result = await executeCrop.call(this, i);
+                break;
+              case 'organize':
+                result = await executeOrganize.call(this, i);
+                break;
+              case 'watermark':
+                result = await executeWatermark.call(this, i);
+                break;
+              default:
+                throw new NodeOperationError(
+                  this.getNode(),
+                  `Unsupported Document Management operation: ${operation}`,
+                );
+            }
+          }
+          // PDF to Format operations
+          else if (resource === 'pdfToFormat') {
+            switch (operation) {
+              case 'pdfToWord':
+                result = await executePdfToWord.call(this, i);
+                break;
+              case 'pdfToExcel':
+                result = await executePdfToExcel.call(this, i);
+                break;
+              case 'pdfToPowerpoint':
+                result = await executePdfToPowerpoint.call(this, i);
+                break;
+              case 'pdfToImage':
+                result = await executePdfToImage.call(this, i);
+                break;
+              default:
+                throw new NodeOperationError(
+                  this.getNode(),
+                  `Unsupported PDF to Format operation: ${operation}`,
+                );
+            }
+          }
+          // Format to PDF operations
+          else if (resource === 'formatToPdf') {
+            switch (operation) {
+              case 'wordToPdf':
+                result = await executeWordToPdf.call(this, i);
+                break;
+              case 'excelToPdf':
+                result = await executeExcelToPdf.call(this, i);
+                break;
+              case 'powerpointToPdf':
+                result = await executePowerpointToPdf.call(this, i);
+                break;
+              case 'imageToPdf':
+                result = await executeImageToPdf.call(this, i);
+                break;
+              case 'htmlToPdf':
+                result = await executeHtmlToPdf.call(this, i);
+                break;
+              case 'markdownToPdf':
+                result = await executeMarkdownToPdf.call(this, i);
+                break;
+              default:
+                throw new NodeOperationError(
+                  this.getNode(),
+                  `Unsupported Format to PDF operation: ${operation}`,
+                );
+            }
+          }
+          // Security & Signing operations
+          else if (resource === 'securitySigning') {
+            switch (operation) {
+              case 'sign':
+                result = await executeSign.call(this, i);
+                break;
+              case 'protect':
+                result = await executeProtect.call(this, i);
+                break;
+              case 'unlock':
+                result = await executeUnlock.call(this, i);
+                break;
+              default:
+                throw new NodeOperationError(
+                  this.getNode(),
+                  `Unsupported Security & Signing operation: ${operation}`,
+                );
+            }
+          } else {
+            throw new NodeOperationError(this.getNode(), `Unsupported resource: ${resource}`);
+          }
+
+          returnData.push(result);
+        } catch (error) {
+          if (this.continueOnFail()) {
+            returnData.push({
+              json: { error: (error as Error).message },
+              pairedItem: { item: i },
+            });
+          } else {
+            throw error;
+          }
         }
       }
+
       return [returnData];
+    } catch (error) {
+      // Top-level catch: return error as JSON so AI agent gets meaningful feedback
+      // instead of an empty string when used via usableAsTool
+      return [[{
+        json: {
+          success: false,
+          error: (error as Error).message,
+          message: `MorphoPDF tool error: ${(error as Error).message}`,
+        },
+      }]];
     }
-
-    // For other operations, process each item individually
-    for (let i = 0; i < items.length; i++) {
-      try {
-        let result: INodeExecutionData;
-
-        // Document Management operations
-        if (resource === 'documentManagement') {
-          switch (operation) {
-            case 'split':
-              result = await executeSplit.call(this, i);
-              break;
-            case 'compress':
-              result = await executeCompress.call(this, i);
-              break;
-            case 'rotate':
-              result = await executeRotate.call(this, i);
-              break;
-            case 'crop':
-              result = await executeCrop.call(this, i);
-              break;
-            case 'organize':
-              result = await executeOrganize.call(this, i);
-              break;
-            case 'watermark':
-              result = await executeWatermark.call(this, i);
-              break;
-            default:
-              throw new NodeOperationError(
-                this.getNode(),
-                `Unsupported Document Management operation: ${operation}`,
-              );
-          }
-        }
-        // PDF to Format operations
-        else if (resource === 'pdfToFormat') {
-          switch (operation) {
-            case 'pdfToWord':
-              result = await executePdfToWord.call(this, i);
-              break;
-            case 'pdfToExcel':
-              result = await executePdfToExcel.call(this, i);
-              break;
-            case 'pdfToPowerpoint':
-              result = await executePdfToPowerpoint.call(this, i);
-              break;
-            case 'pdfToImage':
-              result = await executePdfToImage.call(this, i);
-              break;
-            default:
-              throw new NodeOperationError(
-                this.getNode(),
-                `Unsupported PDF to Format operation: ${operation}`,
-              );
-          }
-        }
-        // Format to PDF operations
-        else if (resource === 'formatToPdf') {
-          switch (operation) {
-            case 'wordToPdf':
-              result = await executeWordToPdf.call(this, i);
-              break;
-            case 'excelToPdf':
-              result = await executeExcelToPdf.call(this, i);
-              break;
-            case 'powerpointToPdf':
-              result = await executePowerpointToPdf.call(this, i);
-              break;
-            case 'imageToPdf':
-              result = await executeImageToPdf.call(this, i);
-              break;
-            case 'htmlToPdf':
-              result = await executeHtmlToPdf.call(this, i);
-              break;
-            case 'markdownToPdf':
-              result = await executeMarkdownToPdf.call(this, i);
-              break;
-            default:
-              throw new NodeOperationError(
-                this.getNode(),
-                `Unsupported Format to PDF operation: ${operation}`,
-              );
-          }
-        }
-        // Security & Signing operations
-        else if (resource === 'securitySigning') {
-          switch (operation) {
-            case 'sign':
-              result = await executeSign.call(this, i);
-              break;
-            case 'protect':
-              result = await executeProtect.call(this, i);
-              break;
-            case 'unlock':
-              result = await executeUnlock.call(this, i);
-              break;
-            default:
-              throw new NodeOperationError(
-                this.getNode(),
-                `Unsupported Security & Signing operation: ${operation}`,
-              );
-          }
-        } else {
-          throw new NodeOperationError(this.getNode(), `Unsupported resource: ${resource}`);
-        }
-
-        returnData.push(result);
-      } catch (error) {
-        if (this.continueOnFail()) {
-          returnData.push({
-            json: { error: (error as Error).message },
-            pairedItem: { item: i },
-          });
-        } else {
-          throw error;
-        }
-      }
-    }
-
-    return [returnData];
   }
 }

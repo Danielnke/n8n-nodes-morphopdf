@@ -35,7 +35,7 @@ export async function executeMerge(
   this: IExecuteFunctions,
   items: INodeExecutionData[],
 ): Promise<INodeExecutionData> {
-  const inputMethod = this.getNodeParameter('inputMethod', 0) as string;
+  const inputMethod = this.getNodeParameter('inputMethod', 0, 'url') as string;
   const outputType = this.getNodeParameter('outputType', 0, 'url') as 'binary' | 'url';
 
   let response: Buffer | object;

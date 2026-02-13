@@ -9,7 +9,7 @@ export async function executePdfToExcel(
   this: IExecuteFunctions,
   itemIndex: number,
 ): Promise<INodeExecutionData> {
-  const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
+  const inputMethod = this.getNodeParameter('inputMethod', itemIndex, 'url') as string;
   const outputType = this.getNodeParameter('outputType', itemIndex, 'url') as 'binary' | 'url';
   const mode = this.getNodeParameter('excelMode', itemIndex, 'convert') as string;
   const regionsJson = this.getNodeParameter('excelRegions', itemIndex, '') as string;

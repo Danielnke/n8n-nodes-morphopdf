@@ -9,9 +9,9 @@ export async function executeSplit(
   this: IExecuteFunctions,
   itemIndex: number,
 ): Promise<INodeExecutionData> {
-  const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
+  const inputMethod = this.getNodeParameter('inputMethod', itemIndex, 'url') as string;
   const outputType = this.getNodeParameter('outputType', itemIndex, 'url') as 'binary' | 'url';
-  const splitMode = this.getNodeParameter('splitMode', itemIndex) as string;
+  const splitMode = this.getNodeParameter('splitMode', itemIndex, 'ranges') as string;
   const ranges = splitMode === 'ranges'
     ? this.getNodeParameter('ranges', itemIndex) as string
     : undefined;
