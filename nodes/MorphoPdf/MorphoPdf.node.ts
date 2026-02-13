@@ -3,12 +3,8 @@ import type {
   INodeExecutionData,
   INodeType,
   INodeTypeDescription,
-  ISupplyDataFunctions,
-  SupplyData,
 } from 'n8n-workflow';
 import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
-import { DynamicStructuredTool } from '@langchain/core/tools';
-import { z } from 'zod';
 
 import {
   resourceProperty,
@@ -148,7 +144,7 @@ export class MorphoPdf implements INodeType {
     },
     inputs: [NodeConnectionTypes.Main],
     outputs: [NodeConnectionTypes.Main],
-    // Note: usableAsTool removed - supplyData() handles AI tool integration
+    usableAsTool: true,
     credentials: [
       {
         name: 'morphoPdfApi',
@@ -269,215 +265,6 @@ export class MorphoPdf implements INodeType {
       outputBinaryPropertyNameProperty,
     ],
   };
-
-  async supplyData(this: ISupplyDataFunctions, itemIndex: number): Promise<SupplyData> {
-    const resource = this.getNodeParameter('resource', itemIndex) as string;
-    const operation = this.getNodeParameter('operation', itemIndex) as string;
-
-    // Sanitize node name for LangChain tool name (alphanumeric + underscores only)
-    const rawName = this.getNode().name || 'MorphoPDF';
-    const toolName = rawName.replace(/[^a-zA-Z0-9_]+/g, '_').replace(/^_|_$/g, '') || 'MorphoPDF';
-
-    // Human-readable operation descriptions
-    const operationDescriptions: Record<string, Record<string, string>> = {
-      documentManagement: {
-        merge: 'Merge multiple PDF files into one',
-        split: 'Split a PDF into separate files',
-        compress: 'Compress a PDF to reduce file size',
-        rotate: 'Rotate pages of a PDF',
-        crop: 'Crop pages of a PDF',
-        organize: 'Reorganize pages of a PDF',
-        watermark: 'Add a watermark to a PDF',
-      },
-      securitySigning: {
-        protect: 'Password-protect a PDF',
-        unlock: 'Remove password protection from a PDF',
-        sign: 'Digitally sign a PDF',
-      },
-      pdfToFormat: {
-        pdfToWord: 'Convert a PDF to Word document',
-        pdfToExcel: 'Convert a PDF to Excel spreadsheet',
-        pdfToPowerpoint: 'Convert a PDF to PowerPoint presentation',
-        pdfToImage: 'Convert PDF pages to images',
-      },
-      formatToPdf: {
-        wordToPdf: 'Convert a Word document to PDF',
-        excelToPdf: 'Convert an Excel spreadsheet to PDF',
-        powerpointToPdf: 'Convert a PowerPoint presentation to PDF',
-        imageToPdf: 'Convert images to a PDF document',
-        htmlToPdf: 'Convert HTML or a webpage to PDF',
-        markdownToPdf: 'Convert Markdown content to PDF',
-      },
-    };
-
-    const description =
-      operationDescriptions[resource]?.[operation] ||
-      `Process a PDF using MorphoPDF (${resource}/${operation})`;
-
-    // API endpoint map
-    const endpointMap: Record<string, Record<string, string>> = {
-      documentManagement: {
-        merge: '/pdf/merge',
-        split: '/pdf/split',
-        compress: '/pdf/compress',
-        rotate: '/pdf/rotate',
-        crop: '/pdf/crop',
-        organize: '/pdf/organize',
-        watermark: '/pdf/watermark',
-      },
-      securitySigning: {
-        protect: '/pdf/protect',
-        unlock: '/pdf/unlock',
-        sign: '/pdf/sign',
-      },
-      pdfToFormat: {
-        pdfToWord: '/convert/pdf-to-word',
-        pdfToExcel: '/convert/pdf-to-excel',
-        pdfToPowerpoint: '/convert/pdf-to-ppt',
-        pdfToImage: '/convert/pdf-to-image',
-      },
-      formatToPdf: {
-        wordToPdf: '/convert/word-to-pdf',
-        excelToPdf: '/convert/excel-to-pdf',
-        powerpointToPdf: '/convert/ppt-to-pdf',
-        imageToPdf: '/convert/image-to-pdf',
-        htmlToPdf: '/convert/html-to-pdf',
-        markdownToPdf: '/convert/markdown-to-pdf',
-      },
-    };
-
-    const endpoint = endpointMap[resource]?.[operation];
-    if (!endpoint) {
-      throw new NodeOperationError(
-        this.getNode(),
-        `No endpoint found for ${resource}/${operation}`,
-      );
-    }
-
-    // Build Zod schema based on the operation
-    let schema: z.ZodType<Record<string, unknown>>;
-    if (operation === 'merge') {
-      schema = z.object({
-        fileUrls: z
-          .string()
-          .describe('Comma-separated URLs of PDF files to merge'),
-      });
-    } else if (operation === 'imageToPdf') {
-      schema = z.object({
-        imageUrls: z
-          .string()
-          .describe('Comma-separated image URLs to convert to PDF'),
-      });
-    } else if (operation === 'htmlToPdf') {
-      schema = z.object({
-        url: z.string().optional().describe('URL of the webpage to convert'),
-        htmlContent: z
-          .string()
-          .optional()
-          .describe('Raw HTML content to convert'),
-      });
-    } else if (operation === 'markdownToPdf') {
-      schema = z.object({
-        markdownContent: z
-          .string()
-          .optional()
-          .describe('Markdown content to convert'),
-        markdownUrl: z
-          .string()
-          .optional()
-          .describe('URL to a markdown file to convert'),
-      });
-    } else {
-      // Default: single file URL operations
-      schema = z.object({
-        fileUrl: z
-          .string()
-          .describe('URL of the PDF or file to process'),
-      });
-    }
-
-    const tool = new DynamicStructuredTool({
-      name: toolName,
-      description,
-      schema,
-      func: async (args: Record<string, string>) => {
-        this.addInputData(NodeConnectionTypes.AiTool, [[{ json: args }]]);
-
-        try {
-          // Build request body based on operation
-          let body: Record<string, unknown>;
-
-          if (operation === 'merge') {
-            const urls = args.fileUrls.split(',').map((u: string) => u.trim()).filter(Boolean);
-            body = { urls };
-          } else if (operation === 'imageToPdf') {
-            const urls = args.imageUrls.split(',').map((u: string) => u.trim()).filter(Boolean);
-            body = { urls };
-          } else if (operation === 'htmlToPdf') {
-            if (args.htmlContent) {
-              body = { html: args.htmlContent };
-            } else if (args.url) {
-              body = { url: args.url };
-            } else {
-              const response = 'Error: Please provide either a URL or HTML content';
-              this.addOutputData(NodeConnectionTypes.AiTool, itemIndex, [[{ json: { response } }]]);
-              return response;
-            }
-          } else if (operation === 'markdownToPdf') {
-            if (args.markdownContent) {
-              body = { markdown: args.markdownContent };
-            } else if (args.markdownUrl) {
-              body = { url: args.markdownUrl };
-            } else {
-              const response = 'Error: Please provide either markdown content or a markdown URL';
-              this.addOutputData(NodeConnectionTypes.AiTool, itemIndex, [[{ json: { response } }]]);
-              return response;
-            }
-          } else {
-            body = { url: args.fileUrl };
-          }
-
-          const requestOptions = {
-            method: 'POST' as const,
-            url: `https://api.morphopdf.com/v1${endpoint}`,
-            body,
-            headers: { 'Content-Type': 'application/json' },
-            json: true,
-          };
-
-          const result = (await this.helpers.httpRequestWithAuthentication.call(
-            this,
-            'morphoPdfApi',
-            requestOptions,
-          )) as {
-            success?: boolean;
-            downloadUrl?: string;
-            fileName?: string;
-            outputSize?: number;
-            message?: string;
-          };
-
-          let downloadUrl = result.downloadUrl || '';
-          if (downloadUrl.startsWith('/')) {
-            downloadUrl = `https://api.morphopdf.com${downloadUrl}`;
-          }
-
-          const response = result.success
-            ? `Successfully completed "${description}". Download URL: ${downloadUrl} (expires in 1 hour). File: ${result.fileName || 'output'}, Size: ${result.outputSize || 'unknown'} bytes.`
-            : `Error: ${result.message || 'Operation failed'}`;
-
-          this.addOutputData(NodeConnectionTypes.AiTool, itemIndex, [[{ json: { response } }]]);
-          return response;
-        } catch (error) {
-          const errMsg = `Error: ${(error as Error).message}`;
-          this.addOutputData(NodeConnectionTypes.AiTool, itemIndex, [[{ json: { response: errMsg } }]]);
-          return errMsg;
-        }
-      },
-    });
-
-    return { response: tool };
-  }
 
   async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
     try {
