@@ -10,7 +10,7 @@ export async function executeRotate(
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
-  const outputType = this.getNodeParameter('outputType', itemIndex, 'binary') as 'binary' | 'url';
+  const outputType = this.getNodeParameter('outputType', itemIndex, 'url') as 'binary' | 'url';
   const angle = this.getNodeParameter('angle', itemIndex) as number;
   const pages = this.getNodeParameter('pages', itemIndex) as string;
   const rotationsJson = this.getNodeParameter('rotations', itemIndex, '') as string;

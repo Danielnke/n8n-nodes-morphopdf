@@ -10,7 +10,7 @@ export async function executePdfToImage(
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
-  const outputType = this.getNodeParameter('outputType', itemIndex, 'binary') as 'binary' | 'url';
+  const outputType = this.getNodeParameter('outputType', itemIndex, 'url') as 'binary' | 'url';
   const format = this.getNodeParameter('imageFormat', itemIndex, 'png') as string;
   const dpi = this.getNodeParameter('dpi', itemIndex, 150) as number;
   const pageRange = this.getNodeParameter('pageRange', itemIndex, 'all') as string;

@@ -36,7 +36,7 @@ export async function executeMerge(
   items: INodeExecutionData[],
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', 0) as string;
-  const outputType = this.getNodeParameter('outputType', 0, 'binary') as 'binary' | 'url';
+  const outputType = this.getNodeParameter('outputType', 0, 'url') as 'binary' | 'url';
 
   let response: Buffer | object;
 

@@ -149,8 +149,8 @@ export const inputMethodProperty: INodeProperties = {
       description: 'Fetch file from a public URL',
     },
   ],
-  default: 'binary',
-  description: 'How to provide the input file',
+  default: 'url',
+  description: 'How to provide the input file (URL recommended for AI tool usage)',
 };
 
 /**
@@ -251,8 +251,8 @@ export const outputTypeProperty: INodeProperties = {
       description: 'Return a temporary download URL (valid for 1 hour)',
     },
   ],
-  default: 'binary',
-  description: 'How to return the processed file',
+  default: 'url',
+  description: 'How to return the processed file (URL recommended for AI tool usage)',
 };
 
 /**

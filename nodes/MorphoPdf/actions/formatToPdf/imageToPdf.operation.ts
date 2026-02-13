@@ -36,7 +36,7 @@ export async function executeImageToPdf(
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
-  const outputType = this.getNodeParameter('outputType', itemIndex, 'binary') as 'binary' | 'url';
+  const outputType = this.getNodeParameter('outputType', itemIndex, 'url') as 'binary' | 'url';
 
   // Get PDF options
   const pageSize = this.getNodeParameter('imageToPdfPageSize', itemIndex, 'A4') as string;

@@ -10,7 +10,7 @@ export async function executeWatermark(
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
-  const outputType = this.getNodeParameter('outputType', itemIndex, 'binary') as 'binary' | 'url';
+  const outputType = this.getNodeParameter('outputType', itemIndex, 'url') as 'binary' | 'url';
   const watermarkType = this.getNodeParameter('watermarkType', itemIndex) as string;
   const position = this.getNodeParameter('watermarkPosition', itemIndex) as string;
   const opacity = this.getNodeParameter('watermarkOpacity', itemIndex) as number;

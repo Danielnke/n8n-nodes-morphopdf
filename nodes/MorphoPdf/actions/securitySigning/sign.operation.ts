@@ -24,7 +24,7 @@ export async function executeSign(
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
-  const outputType = this.getNodeParameter('outputType', itemIndex, 'binary') as 'binary' | 'url';
+  const outputType = this.getNodeParameter('outputType', itemIndex, 'url') as 'binary' | 'url';
 
   // Get required signer name (used as fallback if image embedding fails)
   const signerName = this.getNodeParameter('signerName', itemIndex) as string;

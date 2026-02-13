@@ -10,7 +10,7 @@ export async function executeOrganize(
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const inputMethod = this.getNodeParameter('inputMethod', itemIndex) as string;
-  const outputType = this.getNodeParameter('outputType', itemIndex, 'binary') as 'binary' | 'url';
+  const outputType = this.getNodeParameter('outputType', itemIndex, 'url') as 'binary' | 'url';
 
   // Get new page order from UI parameter
   const newPageOrderInput = this.getNodeParameter('newPageOrder', itemIndex, '') as string;

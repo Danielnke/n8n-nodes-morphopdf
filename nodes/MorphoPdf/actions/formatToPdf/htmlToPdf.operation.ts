@@ -6,7 +6,7 @@ export async function executeHtmlToPdf(
   itemIndex: number,
 ): Promise<INodeExecutionData> {
   const htmlSourceType = this.getNodeParameter('htmlSourceType', itemIndex) as string;
-  const outputType = this.getNodeParameter('outputType', itemIndex, 'binary') as 'binary' | 'url';
+  const outputType = this.getNodeParameter('outputType', itemIndex, 'url') as 'binary' | 'url';
 
   // PDF options
   const pageFormat = this.getNodeParameter('pageFormat', itemIndex, 'A4') as string;

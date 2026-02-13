@@ -2,7 +2,7 @@
 
 > n8n community node for [MorphoPDF](https://morphopdf.com) - Professional PDF processing and conversion
 
-This node allows you to use the MorphoPDF API in your n8n workflows to merge, split, compress, convert, and manipulate PDF files.
+This node allows you to use the MorphoPDF API in your n8n workflows to merge, split, compress, convert, and manipulate PDF files
 
 ## Features
 
