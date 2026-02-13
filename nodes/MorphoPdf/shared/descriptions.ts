@@ -2,6 +2,7 @@ import type { INodeProperties } from 'n8n-workflow';
 
 /**
  * Resource selector - 4 categories matching API documentation
+ * {{$fromAI('resource', 'The PDF processing category: documentManagement, pdfToFormat, formatToPdf, or securitySigning', 'string')}}
  */
 export const resourceProperty: INodeProperties = {
   displayName: 'Resource',
@@ -35,6 +36,7 @@ export const resourceProperty: INodeProperties = {
 
 /**
  * Document Management Operations
+ * {{$fromAI('operation', 'The document operation: compress, merge, split, rotate, crop, organize, or watermark', 'string')}}
  */
 export const documentManagementOperationProperty: INodeProperties = {
   displayName: 'Operation',
@@ -60,6 +62,7 @@ export const documentManagementOperationProperty: INodeProperties = {
 
 /**
  * PDF to Format Operations
+ * {{$fromAI('operation', 'The conversion operation: pdfToWord, pdfToExcel, pdfToPowerpoint, or pdfToImage', 'string')}}
  */
 export const pdfToFormatOperationProperty: INodeProperties = {
   displayName: 'Operation',
@@ -82,6 +85,7 @@ export const pdfToFormatOperationProperty: INodeProperties = {
 
 /**
  * Format to PDF Operations
+ * {{$fromAI('operation', 'The conversion operation: wordToPdf, excelToPdf, powerpointToPdf, imageToPdf, htmlToPdf, or markdownToPdf', 'string')}}
  */
 export const formatToPdfOperationProperty: INodeProperties = {
   displayName: 'Operation',
@@ -106,6 +110,7 @@ export const formatToPdfOperationProperty: INodeProperties = {
 
 /**
  * Security & Signing Operations
+ * {{$fromAI('operation', 'The security operation: protect (add password), unlock (remove password), or sign (add signature)', 'string')}}
  */
 export const securitySigningOperationProperty: INodeProperties = {
   displayName: 'Operation',
@@ -127,6 +132,7 @@ export const securitySigningOperationProperty: INodeProperties = {
 
 /**
  * Input Method - Binary or URL
+ * {{$fromAI('inputMethod', 'How to provide input: binary (from previous node) or url (public URL). Use url for AI tools.', 'string')}}
  */
 export const inputMethodProperty: INodeProperties = {
   displayName: 'Input Method',
@@ -192,6 +198,7 @@ export const htmlBinaryPropertyNameProperty: INodeProperties = {
 /**
  * File URL (for URL input)
  * Note: Excluded from imageToPdf and merge which use their own multi-URL properties
+ * {{$fromAI('fileUrl', 'Public URL of the input file (PDF, DOCX, XLSX, PPTX, HTML, or image depending on operation)', 'string')}}
  */
 export const fileUrlProperty: INodeProperties = {
   displayName: 'File URL',
@@ -234,6 +241,7 @@ export const fileUrlsProperty: INodeProperties = {
 
 /**
  * Output Type - Binary or URL
+ * {{$fromAI('outputType', 'How to return the result: binary (file data) or url (download link). Use url for AI tools.', 'string')}}
  */
 export const outputTypeProperty: INodeProperties = {
   displayName: 'Output Type',
@@ -613,6 +621,7 @@ export const dpiProperty: INodeProperties = {
 
 /**
  * Page Range (for pdfToImage)
+ * {{$fromAI('pageRange', 'Pages to convert: all, 1, 1-5, or 1,3,5', 'string')}}
  */
 export const pageRangeProperty: INodeProperties = {
   displayName: 'Page Range',
