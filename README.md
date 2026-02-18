@@ -53,7 +53,7 @@ npm install n8n-nodes-morphopdf
 
 ### Input Methods
 
-Each operation supports two input methods:
+Each operation supports two input methods: 
 
 1. **Binary Data** - Use file data from a previous node (HTTP Request, Read Binary File, etc.)
 2. **URL** - Provide a public URL to the file

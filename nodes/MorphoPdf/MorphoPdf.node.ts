@@ -424,7 +424,6 @@ export class MorphoPdf implements INodeType {
         json: {
           success: false,
           error: (error as Error).message,
-          message: `MorphoPDF tool error: ${(error as Error).message}`,
         },
       }]];
     }

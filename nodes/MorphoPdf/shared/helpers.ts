@@ -300,7 +300,6 @@ export async function prepareOutput(
       downloadUrl?: string;
       fileName?: string;
       outputSize?: number;
-      message?: string;
     };
 
     if (!apiResponse.success || !apiResponse.downloadUrl) {
@@ -312,14 +311,6 @@ export async function prepareOutput(
       ? apiResponse.downloadUrl
       : `${baseUrl}${apiResponse.downloadUrl}`;
 
-    // Format output as a readable string for AI agents
-    // n8n's tool wrapper converts this to a string for the LLM
-    const resultMessage = `Successfully processed PDF file.
-- File: ${apiResponse.fileName || fileName}
-- Size: ${apiResponse.outputSize} bytes
-- Download URL: ${downloadUrl}
-- Expires in: 1 hour`;
-
     return {
       json: {
         success: true,
@@ -328,8 +319,6 @@ export async function prepareOutput(
         fileSize: apiResponse.outputSize,
         downloadUrl,
         expiresIn: '1 hour',
-        // Include a message field that can be easily read by AI agents
-        message: resultMessage,
       },
       pairedItem: { item: itemIndex },
     };
