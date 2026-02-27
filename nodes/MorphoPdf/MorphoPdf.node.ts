@@ -14,6 +14,7 @@ import {
   securitySigningOperationProperty,
   inputMethodProperty,
   binaryPropertyNameProperty,
+  binaryPropertyNamesProperty,
   fileUrlProperty,
   fileUrlsProperty,
   outputTypeProperty,
@@ -84,7 +85,6 @@ import {
   imageToPdfMarginProperty,
   imageFileUrlsProperty,
   backgroundColorProperty,
-  imageOrderProperty,
   // Protect PDF - encryption level and permissions
   encryptionLevelProperty,
   permModifyingProperty,
@@ -181,6 +181,7 @@ export class MorphoPdf implements INodeType {
 
       // Binary Property Names
       binaryPropertyNameProperty,
+      binaryPropertyNamesProperty,
       htmlBinaryPropertyNameProperty,
       markdownBinaryPropertyNameProperty,
 
@@ -258,7 +259,6 @@ export class MorphoPdf implements INodeType {
       imageToPdfMarginProperty,
       imageFileUrlsProperty,
       backgroundColorProperty,
-      imageOrderProperty,
 
       // 5. Output Configuration (Last)
       outputTypeProperty,

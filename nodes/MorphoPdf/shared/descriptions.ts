@@ -177,6 +177,23 @@ export const binaryPropertyNameProperty: INodeProperties = {
 };
 
 /**
+ * Binary Property Names (for merge/imageToPdf with multiple binary files)
+ */
+export const binaryPropertyNamesProperty: INodeProperties = {
+  displayName: 'Input Binary Properties',
+  name: 'binaryPropertyNames',
+  type: 'string',
+  default: '',
+  displayOptions: {
+    show: {
+      inputMethod: ['binary'],
+    },
+  },
+  description: 'Comma-separated binary property names (no spaces). Order determines merge/order.',
+  hint: 'e.g., "file1,file2,file3" - from previous nodes output',
+};
+
+/**
  * HTML Binary Property Name (for HTML to PDF file upload)
  */
 export const htmlBinaryPropertyNameProperty: INodeProperties = {
@@ -224,10 +241,7 @@ export const fileUrlsProperty: INodeProperties = {
   displayName: 'File URLs',
   name: 'fileUrls',
   type: 'string',
-  typeOptions: {
-    multipleValues: true,
-  },
-  default: [],
+  default: '',
   displayOptions: {
     show: {
       resource: ['documentManagement'],
@@ -235,8 +249,8 @@ export const fileUrlsProperty: INodeProperties = {
       inputMethod: ['url'],
     },
   },
-  description: 'Public URLs of PDF files to merge (PDF only - use Image to PDF for images). Add at least 2 URLs using the + button.',
-  placeholder: 'https://example.com/document.pdf',
+  description: 'Public URLs of PDF files to merge (comma-separated, no spaces). Order determines merge order.',
+  placeholder: 'https://example.com/doc1.pdf,https://example.com/doc2.pdf',
 };
 
 /**
@@ -1426,10 +1440,7 @@ export const imageFileUrlsProperty: INodeProperties = {
   displayName: 'Image URLs',
   name: 'imageFileUrls',
   type: 'string',
-  typeOptions: {
-    multipleValues: true,
-  },
-  default: [],
+  default: '',
   displayOptions: {
     show: {
       resource: ['formatToPdf'],
@@ -1437,8 +1448,8 @@ export const imageFileUrlsProperty: INodeProperties = {
       inputMethod: ['url'],
     },
   },
-  description: 'Public URLs of images to combine into PDF. Add URLs using the + button (at least 1 required).',
-  placeholder: 'https://example.com/image.jpg',
+  description: 'Public URLs of images to combine into PDF (comma-separated, no spaces). Order determines PDF page order.',
+  placeholder: 'https://example.com/img1.jpg,https://example.com/img2.jpg',
 };
 
 /**
@@ -1460,26 +1471,7 @@ export const backgroundColorProperty: INodeProperties = {
   description: 'Background color in hex format (not applicable when page size is Original)',
 };
 
-/**
- * Image Order JSON
- */
-export const imageOrderProperty: INodeProperties = {
-  displayName: 'Image Order (JSON)',
-  name: 'imageOrder',
-  type: 'string',
-  typeOptions: {
-    rows: 4,
-  },
-  displayOptions: {
-    show: {
-      resource: ['formatToPdf'],
-      operation: ['imageToPdf'],
-    },
-  },
-  default: '',
-  placeholder: '[{"name": "photo1.jpg", "rotation": 0, "order": 0}]',
-  description: 'Optional JSON array to control order and rotation: [{ name, rotation (0/90/180/270), order }]',
-};
+
 
 // ----------------------------------------------------------------------------
 // PROTECT PDF - Encryption and permissions

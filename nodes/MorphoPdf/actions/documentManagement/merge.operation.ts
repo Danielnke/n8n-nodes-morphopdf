@@ -1,7 +1,6 @@
 import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
 import {
   morphoPdfApiRequest,
-  getMultipleInputFiles,
   prepareOutput,
 } from '../../shared/helpers';
 
@@ -60,8 +59,38 @@ export async function executeMerge(
       outputType,
     );
   } else {
-    // Binary-based merge - collect all input files
-    const files = await getMultipleInputFiles.call(this, items);
+    // Binary-based merge - collect files from comma-separated binary property names
+    const binaryPropertyNamesParam = this.getNodeParameter('binaryPropertyNames', 0, 'data') as string;
+    
+    // Parse comma-separated property names
+    const propertyNames = binaryPropertyNamesParam
+      .split(',')
+      .map((name) => name.trim())
+      .filter((name) => name.length > 0);
+    
+    if (propertyNames.length < 2) {
+      throw new Error('At least 2 binary property names are required for merging. Provide comma-separated property names.');
+    }
+    
+    // Collect files from each specified property name
+    const files: Array<{ content: Buffer; fileName: string; mimeType: string }> = [];
+    
+    for (const propertyName of propertyNames) {
+      for (let i = 0; i < items.length; i++) {
+        try {
+          const binaryData = this.helpers.assertBinaryData(i, propertyName);
+          const buffer = await this.helpers.getBinaryDataBuffer(i, propertyName);
+          files.push({
+            content: buffer,
+            fileName: binaryData.fileName || `file${files.length + 1}.pdf`,
+            mimeType: binaryData.mimeType || 'application/pdf',
+          });
+        } catch {
+          // Skip items without this binary property
+          continue;
+        }
+      }
+    }
 
     if (files.length < 2) {
       throw new Error('At least 2 PDF files are required for merging');

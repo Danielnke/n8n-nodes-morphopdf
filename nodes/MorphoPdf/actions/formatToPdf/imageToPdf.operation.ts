@@ -1,7 +1,6 @@
 import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
 import {
   morphoPdfApiRequest,
-  getMultipleInputFiles,
   prepareOutput,
 } from '../../shared/helpers';
 
@@ -74,9 +73,39 @@ export async function executeImageToPdf(
       outputType,
     );
   } else {
-    // Get all input items for batch image processing
+    // Binary-based image to PDF - collect files from comma-separated binary property names
+    const binaryPropertyNamesParam = this.getNodeParameter('binaryPropertyNames', itemIndex, 'data') as string;
+    
+    // Parse comma-separated property names
+    const propertyNames = binaryPropertyNamesParam
+      .split(',')
+      .map((name) => name.trim())
+      .filter((name) => name.length > 0);
+    
+    if (propertyNames.length === 0) {
+      throw new Error('At least one binary property name is required');
+    }
+    
+    // Collect files from each specified property name
+    const files: Array<{ content: Buffer; fileName: string; mimeType: string }> = [];
     const items = this.getInputData();
-    const files = await getMultipleInputFiles.call(this, items);
+    
+    for (const propertyName of propertyNames) {
+      for (let i = 0; i < items.length; i++) {
+        try {
+          const binaryData = this.helpers.assertBinaryData(i, propertyName);
+          const buffer = await this.helpers.getBinaryDataBuffer(i, propertyName);
+          files.push({
+            content: buffer,
+            fileName: binaryData.fileName || `image${files.length + 1}`,
+            mimeType: binaryData.mimeType || 'image/jpeg',
+          });
+        } catch {
+          // Skip items without this binary property
+          continue;
+        }
+      }
+    }
 
     if (files.length === 0) {
       throw new Error('At least one image is required');
@@ -87,7 +116,7 @@ export async function executeImageToPdf(
       margin: margin.toString(),
     };
 
-    // Only include backgroundColor when pageSize is not 'Original'
+    // Only include background is not 'OriginalColor when pageSize'
     if (pageSize !== 'Original') {
       formData.backgroundColor = backgroundColor;
     }
