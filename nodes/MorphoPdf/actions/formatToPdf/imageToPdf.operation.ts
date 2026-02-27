@@ -38,9 +38,9 @@ export async function executeImageToPdf(
   const outputType = this.getNodeParameter('outputType', itemIndex, 'url') as 'binary' | 'url';
 
   // Get PDF options
-  const pageSize = this.getNodeParameter('imageToPdfPageSize', itemIndex, 'A4') as string;
-  const margin = this.getNodeParameter('imageToPdfMargin', itemIndex, 36) as number;
+  const pageSize = this.getNodeParameter('pageSize', itemIndex, 'A4') as string;
   const backgroundColor = this.getNodeParameter('backgroundColor', itemIndex, '#FFFFFF') as string;
+
 
   let response: Buffer | object;
 
@@ -55,7 +55,6 @@ export async function executeImageToPdf(
     const body: Record<string, unknown> = {
       urls: fileUrls,
       pageSize,
-      margin,
     };
 
     // Only include backgroundColor when pageSize is not 'Original'
@@ -113,7 +112,6 @@ export async function executeImageToPdf(
 
     const formData: Record<string, unknown> = {
       pageSize,
-      margin: margin.toString(),
     };
 
     // Only include background is not 'OriginalColor when pageSize'

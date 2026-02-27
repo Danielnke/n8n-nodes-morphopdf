@@ -171,6 +171,9 @@ export const binaryPropertyNameProperty: INodeProperties = {
     show: {
       inputMethod: ['binary'],
     },
+    hide: {
+      operation: ['merge', 'imageToPdf'],
+    },
   },
   description: 'Name of the binary property containing the input file',
   hint: 'The property name from a previous node (e.g., "data" from HTTP Request)',
@@ -187,6 +190,7 @@ export const binaryPropertyNamesProperty: INodeProperties = {
   displayOptions: {
     show: {
       inputMethod: ['binary'],
+      operation: ['merge', 'imageToPdf'],
     },
   },
   description: 'Comma-separated binary property names (no spaces). Order determines merge/order.',
@@ -1416,22 +1420,6 @@ export const imageToPdfPageSizeProperty: INodeProperties = {
   description: 'Page size for the output PDF',
 };
 
-/**
- * Image to PDF Margin
- */
-export const imageToPdfMarginProperty: INodeProperties = {
-  displayName: 'Margin (Points)',
-  name: 'margin',
-  type: 'number',
-  displayOptions: {
-    show: {
-      resource: ['formatToPdf'],
-      operation: ['imageToPdf'],
-    },
-  },
-  default: 36,
-  description: 'Margin around images in points (72 points = 1 inch)',
-};
 
 /**
  * Multiple Image URLs (for imageToPdf with URL input)

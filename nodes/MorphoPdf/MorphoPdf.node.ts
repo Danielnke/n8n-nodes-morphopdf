@@ -82,9 +82,9 @@ import {
   forceBrowserRenderingProperty,
   // Image to PDF - extended options
   imageToPdfPageSizeProperty,
-  imageToPdfMarginProperty,
   imageFileUrlsProperty,
   backgroundColorProperty,
+  // Protect PDF - encryption level and permissions
   // Protect PDF - encryption level and permissions
   encryptionLevelProperty,
   permModifyingProperty,
@@ -254,11 +254,11 @@ export class MorphoPdf implements INodeType {
       timeoutProperty,
       waitForSelectorProperty,
       forceBrowserRenderingProperty,
-      // Image to PDF options
       imageToPdfPageSizeProperty,
-      imageToPdfMarginProperty,
       imageFileUrlsProperty,
       backgroundColorProperty,
+
+      // 5. Output Configuration (Last)
 
       // 5. Output Configuration (Last)
       outputTypeProperty,
